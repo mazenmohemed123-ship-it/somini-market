@@ -1,0 +1,36 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "chats": {
+      "$chatId": {
+        ".read": "auth != null && data.child('participants').child(auth.uid).exists()",
+        "metadata": {
+          "participants": {
+            ".write": "auth != null && (!data.exists() || data.child(auth.uid).exists())"
+          }
+        },
+        "messages": {
+          ".read": "auth != null && root.child('chats').child($chatId).child('metadata').child('participants').child(auth.uid).exists()",
+          "$messageId": {
+            ".write": "auth != null && (!data.exists()) && newData.child('senderId').val() === auth.uid && root.child('chats').child($chatId).child('metadata').child('participants').child(auth.uid).exists()",
+            ".validate": "newData.hasChildren(['senderId', 'text', 'createdAt']) && newData.child('text').isString() && newData.child('text').val().length <= 4000"
+          }
+        },
+        "typing": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        }
+      }
+    },
+
+    "presence": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }
+}

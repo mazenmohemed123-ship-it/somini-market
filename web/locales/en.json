@@ -1,0 +1,65 @@
+{
+  "appName": "Somni Market",
+  "tagline": "Secure multi-vendor marketplace with full escrow",
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "orders": "My Orders",
+    "login": "Login",
+    "logout": "Logout",
+    "sell": "Start Selling"
+  },
+  "home": {
+    "searchPlaceholder": "Search products...",
+    "allCategories": "All categories",
+    "filterPrice": "Price",
+    "condition": "Condition",
+    "new": "New",
+    "used": "Used",
+    "noResults": "No matching products"
+  },
+  "product": {
+    "buyNow": "Buy Now",
+    "addToCart": "Add to Cart",
+    "chatSeller": "Chat with Seller",
+    "quantity": "Quantity",
+    "available": "Available",
+    "escrowProtected": "Escrow Protected",
+    "escrowNote": "Funds are held safely until you confirm delivery."
+  },
+  "escrow": {
+    "held": "Held",
+    "released": "Released",
+    "refunded": "Refunded",
+    "disputed": "Disputed",
+    "release": "Release Funds",
+    "openDispute": "Open Dispute",
+    "confirmReceive": "Confirm Receipt & Release",
+    "autoReleaseOn": "Auto-release on"
+  },
+  "chat": {
+    "title": "Chat",
+    "send": "Send",
+    "placeholder": "Type a message...",
+    "typing": "typing...",
+    "assistant": "AI Assistant",
+    "assistantHint": "Ask me: search a product, how much did I earn today?, how to return?"
+  },
+  "dashboard": {
+    "title": "Seller Dashboard",
+    "salesToday": "Sales Today",
+    "salesMonth": "Sales This Month",
+    "orders": "Orders",
+    "pending": "Pending Orders",
+    "disputes": "Open Disputes",
+    "topProducts": "Top Products",
+    "monthlyChart": "Monthly Sales"
+  },
+  "common": {
+    "loading": "Loading...",
+    "currency": "EGP",
+    "save": "Save",
+    "cancel": "Cancel",
+    "error": "Something went wrong, try again"
+  }
+}

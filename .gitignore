@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+web/.next/
+web/out/
+web/build/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+database-debug.log
+ui-debug.log
+*-debug.log
+
+# Env / secrets
+.env
+.env*.local
+.env.local
+serviceAccount*.json
+**/serviceAccount*.json
+
+# Functions
+functions/node_modules/
+
+# Build / cache
+.cache/
+dist/
+coverage/
+
+# OS / editor
+.DS_Store
+*.pem
+.idea/
+.vscode/
+*.log
+npm-debug.log*
+yarn-error.log

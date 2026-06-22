@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// Somni Market — Cloud Storage Rules
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*')
+        && request.resource.size < 8 * 1024 * 1024; // 8MB
+    }
+
+    // صور المنتجات: يكتبها البائع المالك للـ tenant فقط
+    match /products/{tenantId}/{sellerId}/{fileName} {
+      allow read: if true; // صور عامة للعرض
+      allow write: if isSignedIn()
+        && request.auth.uid == sellerId
+        && request.auth.token.tenantId == tenantId
+        && isImage();
+    }
+
+    // صور الشات: يكتبها المشاركون فقط، تُقرأ عند تسجيل الدخول
+    match /chats/{chatId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isImage();
+    }
+
+    // ملفات الرفع بالجملة (CSV/Excel)
+    match /bulkUploads/{tenantId}/{sellerId}/{fileName} {
+      allow read: if isSignedIn() && request.auth.uid == sellerId;
+      allow write: if isSignedIn()
+        && request.auth.uid == sellerId
+        && request.resource.size < 25 * 1024 * 1024;
+    }
+
+    // الصور الشخصية
+    match /avatars/{uid}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == uid && isImage();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

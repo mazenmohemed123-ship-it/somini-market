@@ -1,0 +1,222 @@
+rules_version = '2';
+
+// =============================================================
+// Somni Market — Firestore Security Rules
+// عزل تام لكل tenant + أدوار صارمة. الكتابة الحساسة (المال،
+// الطلبات، حالة الضمان) تتم عبر Cloud Functions فقط (Admin SDK
+// يتجاوز هذه القواعد)، أمّا العميل فمقيّد بالقراءة والإنشاء الآمن.
+// =============================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- دوال مساعدة ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function authData() {
+      return request.auth.token;
+    }
+
+    // الدور مخزّن في Custom Claims (يُضبط عبر createTenant / setUserRole)
+    function role() {
+      return isSignedIn() ? authData().role : 'guest';
+    }
+
+    function hasRole(r) {
+      return role() == r;
+    }
+
+    function isSuperAdmin() {
+      return hasRole('superAdmin');
+    }
+
+    // tenant المستخدم من Custom Claims
+    function myTenant() {
+      return isSignedIn() ? authData().tenantId : null;
+    }
+
+    // العزل: المستند يخص نفس tenant المستخدم
+    function isTenantMember(tid) {
+      return isSignedIn() && (myTenant() == tid || isSuperAdmin());
+    }
+
+    // فحص عضوية الشركة (نفس الـ tenant) — مطلوبة في الوصف
+    function isCompanyMember(tid) {
+      return isTenantMember(tid);
+    }
+
+    function isSeller() {
+      return hasRole('seller') || hasRole('companyAdmin');
+    }
+
+    function isBuyer() {
+      return hasRole('buyer');
+    }
+
+    function isSupport() {
+      return hasRole('supportAgent') || isSuperAdmin();
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // التحقق أن الحقول المحمية لم تتغير في التحديث
+    function unchanged(field) {
+      return request.resource.data[field] == resource.data[field];
+    }
+
+    // ---------- tenants ----------
+    match /tenants/{tenantId} {
+      allow read: if isTenantMember(tenantId);
+      // الإنشاء/التعديل عبر Cloud Function فقط
+      allow write: if isSuperAdmin();
+    }
+
+    // ---------- users ----------
+    match /users/{uid} {
+      allow read: if isOwner(uid)
+        || (isSignedIn() && isTenantMember(resource.data.tenantId))
+        || isSupport();
+      // إنشاء ملف المستخدم لنفسه فقط، ومع منع رفع الدور
+      allow create: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.role in ['buyer', 'seller'];
+      // المستخدم يحدّث بياناته الشخصية دون تغيير الدور أو الـ tenant
+      allow update: if isOwner(uid)
+        && unchanged('role') && unchanged('tenantId') && unchanged('uid');
+      allow delete: if isSuperAdmin();
+    }
+
+    // ---------- products ----------
+    match /products/{productId} {
+      // المنتجات النشطة عامة للتصفح؛ غير النشطة لأصحاب الـ tenant
+      allow read: if resource.data.status == 'active'
+        || isTenantMember(resource.data.tenantId);
+
+      allow create: if isSeller()
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.tenantId == myTenant()
+        && request.resource.data.price is number
+        && request.resource.data.price >= 0
+        && request.resource.data.condition in ['new', 'used']
+        && request.resource.data.status in ['active', 'pending'];
+
+      allow update: if isSeller()
+        && resource.data.sellerId == request.auth.uid
+        && isTenantMember(resource.data.tenantId)
+        && unchanged('sellerId') && unchanged('tenantId');
+
+      allow delete: if (isSeller() && resource.data.sellerId == request.auth.uid)
+        || isSuperAdmin();
+    }
+
+    // ---------- orders ----------
+    // القراءة لطرفي الصفقة فقط؛ كل الكتابة عبر Cloud Functions.
+    match /orders/{orderId} {
+      allow read: if isSignedIn() && (
+        resource.data.buyerId == request.auth.uid
+        || resource.data.sellerId == request.auth.uid
+        || isSuperAdmin()
+        || (isSupport() && isTenantMember(resource.data.tenantId))
+      );
+      allow write: if false; // Admin SDK only
+    }
+
+    // ---------- escrowTransactions ----------
+    // حساسة جداً: للقراءة فقط للأطراف؛ كل تعديل عبر Cloud Functions.
+    match /escrowTransactions/{escrowId} {
+      allow read: if isSignedIn() && (
+        resource.data.buyerId == request.auth.uid
+        || resource.data.sellerId == request.auth.uid
+        || isSuperAdmin()
+      );
+      allow write: if false; // Admin SDK only (release/refund/dispute)
+    }
+
+    // ---------- supportTickets ----------
+    match /supportTickets/{ticketId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isSupport()
+      );
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'open';
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isSupport()
+      );
+      allow delete: if isSuperAdmin();
+    }
+
+    // ---------- chats (نسخة Firestore الاحتياطية + الفهرسة) ----------
+    // الرسائل الحيّة في Realtime Database؛ هنا الميتاداتا فقط.
+    match /chats/{chatId} {
+      // المعرّف يُبنى من uid الطرفين: "uidA_uidB" (مرتّبة أبجدياً)
+      function isParticipant() {
+        return isSignedIn() && (
+          request.auth.uid in resource.data.participants
+        );
+      }
+      allow read: if isParticipant() || isSupport();
+      allow create: if isSignedIn()
+        && request.auth.uid in request.resource.data.participants
+        && request.resource.data.participants.size() == 2;
+      allow update: if (isSignedIn() && request.auth.uid in resource.data.participants)
+        || isSupport();
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn() && (
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants
+          || isSupport()
+        );
+        allow create: if isSignedIn()
+          && request.resource.data.senderId == request.auth.uid
+          && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        allow update, delete: if false;
+      }
+    }
+
+    // ---------- bulkUploadJobs ----------
+    match /bulkUploadJobs/{jobId} {
+      allow read: if isSignedIn()
+        && resource.data.sellerId == request.auth.uid
+        && isTenantMember(resource.data.tenantId);
+      allow create: if isSeller()
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.tenantId == myTenant();
+      allow update, delete: if false; // النتائج تُكتب عبر Cloud Function
+    }
+
+    // ---------- apiIntegrations ----------
+    // لا تُقرأ مفاتيح API من العميل أبداً؛ المفاتيح في Secret Manager.
+    match /apiIntegrations/{integrationId} {
+      allow read: if isSignedIn()
+        && resource.data.sellerId == request.auth.uid
+        && isTenantMember(resource.data.tenantId);
+      allow write: if false; // عبر Cloud Function فقط
+    }
+
+    // ---------- botSessions (جلسات البوت المؤقتة، TTL) ----------
+    match /botSessions/{sessionId} {
+      allow read, write: if isOwner(resource.data.userId)
+        || isOwner(request.resource.data.userId);
+    }
+
+    // ---------- reviews / ratings ----------
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+      allow update, delete: if isOwner(resource.data.userId) || isSuperAdmin();
+    }
+
+    // منع أي وصول غير معرّف صراحةً
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

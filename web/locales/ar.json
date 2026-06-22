@@ -1,0 +1,65 @@
+{
+  "appName": "سومني ماركت",
+  "tagline": "سوق آمن متعدد البائعين بضمان كامل",
+  "nav": {
+    "home": "الرئيسية",
+    "dashboard": "لوحة التحكم",
+    "orders": "طلباتي",
+    "login": "تسجيل الدخول",
+    "logout": "خروج",
+    "sell": "ابدأ البيع"
+  },
+  "home": {
+    "searchPlaceholder": "ابحث عن منتج...",
+    "allCategories": "كل الفئات",
+    "filterPrice": "السعر",
+    "condition": "الحالة",
+    "new": "جديد",
+    "used": "مستعمل",
+    "noResults": "لا توجد منتجات مطابقة"
+  },
+  "product": {
+    "buyNow": "اشترِ الآن",
+    "addToCart": "أضف للسلة",
+    "chatSeller": "محادثة البائع",
+    "quantity": "الكمية",
+    "available": "متوفر",
+    "escrowProtected": "محميّة بحساب الضمان",
+    "escrowNote": "المبلغ يُحتجز بأمان حتى تؤكّد استلام المنتج."
+  },
+  "escrow": {
+    "held": "محتجز",
+    "released": "محرَّر",
+    "refunded": "مُسترجع",
+    "disputed": "قيد النزاع",
+    "release": "تحرير المبلغ",
+    "openDispute": "فتح نزاع",
+    "confirmReceive": "تأكيد الاستلام وتحرير المبلغ",
+    "autoReleaseOn": "تحرير تلقائي في"
+  },
+  "chat": {
+    "title": "المحادثة",
+    "send": "إرسال",
+    "placeholder": "اكتب رسالة...",
+    "typing": "يكتب الآن...",
+    "assistant": "المساعد الذكي",
+    "assistantHint": "اسألني: ابحث عن منتج، كم ربحت اليوم؟، كيف أرجع منتج؟"
+  },
+  "dashboard": {
+    "title": "لوحة تحكم البائع",
+    "salesToday": "مبيعات اليوم",
+    "salesMonth": "مبيعات الشهر",
+    "orders": "الطلبات",
+    "pending": "طلبات معلّقة",
+    "disputes": "نزاعات مفتوحة",
+    "topProducts": "الأكثر مبيعاً",
+    "monthlyChart": "مبيعات الشهر"
+  },
+  "common": {
+    "loading": "جارٍ التحميل...",
+    "currency": "ج.م",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "error": "حدث خطأ، حاول مجدداً"
+  }
+}
