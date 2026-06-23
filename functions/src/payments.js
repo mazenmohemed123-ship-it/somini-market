@@ -10,6 +10,7 @@ const axios = require('axios');
 const { REGION, DEFAULTS, getSecret } = require('../lib/config');
 const { db, FieldValue, Timestamp } = require('../lib/admin');
 const { createEscrowForOrder } = require('./escrow');
+const { sendToUser } = require('./notifications');
 
 const PAYMOB_BASE = 'https://accept.paymob.com/api';
 
@@ -183,6 +184,13 @@ const handlePaymobWebhook = onRequest(
         const escrowId = await createEscrowForOrder(fresh);
         await orderRef.update({ escrowId });
       }
+
+      // إشعار البائع بطلب مدفوع جديد
+      await sendToUser(
+        fresh.sellerId,
+        { title: '🛒 طلب جديد مدفوع', body: `${fresh.productTitle} — ${fresh.totalAmount} ${fresh.currency}` },
+        { type: 'order', orderId: fresh.orderId, url: '/seller/dashboard' }
+      );
 
       res.status(200).send('ok');
     } catch (err) {

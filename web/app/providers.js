@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { AuthProvider } from '../lib/auth';
 import { I18nProvider } from '../lib/i18n';
 import AssistantBot from '../components/AssistantBot';
+import NotificationsSetup from '../components/NotificationsSetup';
 
 export default function Providers({ children }) {
   useEffect(() => {
@@ -17,6 +18,7 @@ export default function Providers({ children }) {
       <AuthProvider>
         {children}
         <AssistantBot />
+        <NotificationsSetup />
       </AuthProvider>
     </I18nProvider>
   );

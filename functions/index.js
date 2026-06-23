@@ -53,6 +53,17 @@ exports.addReview = reviews.addReview;
 const stats = require('./src/stats');
 exports.sellerDashboard = stats.sellerDashboard;
 
+// --- الإشعارات (FCM) ---
+const notifications = require('./src/notifications');
+exports.saveFcmToken = notifications.saveFcmToken;
+exports.removeFcmToken = notifications.removeFcmToken;
+
+// --- لوحة الأدمن (superAdmin) ---
+const adminPanel = require('./src/admin');
+exports.adminStats = adminPanel.adminStats;
+exports.adminListDisputes = adminPanel.adminListDisputes;
+exports.adminListEscrows = adminPanel.adminListEscrows;
+
 // --- REST API للتكاملات الخارجية ---
 const api = require('./src/api');
 exports.api = api.api;

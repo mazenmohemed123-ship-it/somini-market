@@ -8,6 +8,7 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { REGION, DEFAULTS } = require('../lib/config');
 const { db, FieldValue, Timestamp } = require('../lib/admin');
+const { sendToUser } = require('./notifications');
 
 /**
  * ينشئ مستند ضمان من طلب مدفوع (يُستدعى داخلياً من webhook الدفع).
@@ -58,7 +59,7 @@ const releaseEscrow = onCall({ region: REGION }, async (request) => {
 
   const escrowRef = db.collection('escrowTransactions').doc(escrowId);
 
-  return db.runTransaction(async (tx) => {
+  const result = await db.runTransaction(async (tx) => {
     const snap = await tx.get(escrowRef);
     if (!snap.exists) throw new HttpsError('not-found', 'مستند الضمان غير موجود.');
     const e = snap.data();
@@ -94,8 +95,15 @@ const releaseEscrow = onCall({ region: REGION }, async (request) => {
       createdAt: FieldValue.serverTimestamp()
     });
 
-    return { ok: true, status: 'released', payout: e.sellerPayout };
+    return { ok: true, status: 'released', payout: e.sellerPayout, sellerId: e.sellerId, currency: e.currency };
   });
+
+  await sendToUser(
+    result.sellerId,
+    { title: '💰 تم تحرير مبلغ الضمان', body: `${result.payout} ${result.currency} في طريقها إليك` },
+    { type: 'escrow', escrowId, url: '/seller/dashboard' }
+  );
+  return { ok: true, status: result.status, payout: result.payout };
 });
 
 /**
@@ -113,7 +121,7 @@ const openDispute = onCall({ region: REGION }, async (request) => {
 
   const escrowRef = db.collection('escrowTransactions').doc(escrowId);
 
-  return db.runTransaction(async (tx) => {
+  const result = await db.runTransaction(async (tx) => {
     const snap = await tx.get(escrowRef);
     if (!snap.exists) throw new HttpsError('not-found', 'مستند الضمان غير موجود.');
     const e = snap.data();
@@ -135,8 +143,16 @@ const openDispute = onCall({ region: REGION }, async (request) => {
       updatedAt: FieldValue.serverTimestamp()
     });
 
-    return { ok: true, status: 'disputed' };
+    return { ok: true, status: 'disputed', sellerId: e.sellerId };
   });
+
+  // أعلم البائع بفتح النزاع (الأدمن يراه في لوحة النزاعات)
+  await sendToUser(
+    result.sellerId,
+    { title: '⚖️ تم فتح نزاع', body: 'فتح المشتري نزاعاً على إحدى صفقاتك. الأموال مجمّدة حتى الحل.' },
+    { type: 'dispute', escrowId, url: '/orders' }
+  );
+  return { ok: true, status: result.status };
 });
 
 /**

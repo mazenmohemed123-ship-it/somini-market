@@ -7,6 +7,7 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onValueCreated } = require('firebase-functions/v2/database');
 const { REGION } = require('../lib/config');
 const { db, rtdb, FieldValue } = require('../lib/admin');
+const { sendToUser } = require('./notifications');
 
 // معرّف محادثة ثابت بين طرفين (مرتّب أبجدياً ⇒ نفس المعرّف لأي اتجاه).
 function chatIdFor(a, b) {
@@ -80,7 +81,14 @@ const onChatMessage = onValueCreated(
     }
     await chatRef.update(update);
 
-    // (إشعار FCM للطرف المستقبِل يُطلق من هنا — انظر notifications.js)
+    // إشعار FCM للطرف المستقبِل
+    if (receiver) {
+      await sendToUser(
+        receiver,
+        { title: '💬 رسالة جديدة', body: update.lastMessage },
+        { type: 'chat', chatId, url: '/chats' }
+      );
+    }
   }
 );
 

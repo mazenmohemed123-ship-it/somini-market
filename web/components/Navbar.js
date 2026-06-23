@@ -8,6 +8,7 @@ export default function Navbar() {
   const { t, lang, setLang } = useI18n();
   const { user, role, logout } = useAuth();
   const isSeller = role === 'seller' || role === 'companyAdmin';
+  const isAdmin = role === 'superAdmin';
 
   return (
     <header className="navbar">
@@ -19,7 +20,8 @@ export default function Navbar() {
         {user && <Link href="/orders">{t('nav.orders')}</Link>}
         {user && <Link href="/chats">💬</Link>}
         {isSeller && <Link href="/seller/dashboard">{t('nav.dashboard')}</Link>}
-        {!isSeller && <Link href="/seller/start">{t('nav.sell')}</Link>}
+        {!isSeller && !isAdmin && <Link href="/seller/start">{t('nav.sell')}</Link>}
+        {isAdmin && <Link href="/admin" className="navbar__admin">🛡️ الأدمن</Link>}
         <select
           className="navbar__lang"
           value={lang}

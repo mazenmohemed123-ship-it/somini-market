@@ -32,6 +32,14 @@ export const rtdb = getDatabase(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app, region);
 
+// Messaging (FCM) — يُحمَّل بكسل لأنه يتطلب المتصفح ودعم Service Worker.
+export async function getMessagingIfSupported() {
+  if (typeof window === 'undefined') return null;
+  const { isSupported, getMessaging } = await import('firebase/messaging');
+  if (!(await isSupported())) return null;
+  return getMessaging(app);
+}
+
 // --- ربط الـ Emulators (تطوير محلي) ---
 // يضمن أن الفرونت يتكلّم مع Firebase المحلي عند التطوير دون أي مفاتيح إنتاج.
 if (typeof window !== 'undefined' && USE_EMULATORS && !window.__SOMNI_EMU__) {

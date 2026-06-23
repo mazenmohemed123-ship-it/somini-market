@@ -166,7 +166,25 @@ firebase deploy --only hosting
 - **تقييمات المنتجات** (`addReview`): تقييم 1–5 بعد شراء موثّق، مع تحديث متوسط
   المنتج ذرّياً وعرضه على البطاقات وصفحة المنتج.
 - **صندوق محادثات** (`/chats`): قائمة محادثات لحظية مع عدّاد غير المقروء.
+- **إشعارات FCM** (`saveFcmToken` + `sendToUser`): إشعار فوري عند رسالة جديدة،
+  طلب مدفوع، فتح نزاع، أو تحرير ضمان — مع تنظيف الرموز المنتهية تلقائياً
+  و`firebase-messaging-sw.js` لإشعارات الخلفية.
+- **لوحة الأدمن** (`/admin`، superAdmin): إحصائيات المنصة كاملة + إدارة النزاعات
+  (تحرير للبائع / استرجاع للمشتري) عبر `adminStats` و`adminListDisputes`.
 - **تصميم فاتح** مشرق (تركواز/زمردي ناعم) + ربط تلقائي بالـ Emulators للتطوير.
+
+### 🔑 كيف تصبح superAdmin (للوصول إلى `/admin`)
+```bash
+cd functions
+# على مشروع حقيقي (بمفتاح حساب خدمة):
+GOOGLE_APPLICATION_CREDENTIALS=./serviceAccount.json GCLOUD_PROJECT=somni-market \
+  node scripts/set-admin.js mazenmohemed123@gmail.com
+
+# أو على الـ Auth Emulator:
+FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 GCLOUD_PROJECT=demo \
+  node scripts/set-admin.js you@example.com
+```
+ثم سجّل الخروج والدخول مجدداً لتفعيل الصلاحية، وسيظهر رابط «🛡️ الأدمن» في الشريط.
 
 ## 🗺️ خارطة طريق (لم تُنفَّذ بعد)
 - استرجاع Paymob الفعلي (`refunds` تُسجَّل كـ pending حالياً).

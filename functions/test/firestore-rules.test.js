@@ -134,4 +134,14 @@ describe('escrowTransactions — حساسة', () => {
     const buyer = ctx('buyerX', { role: 'buyer', tenantId: 'public' });
     await assertFails(updateDoc(doc(buyer, 'escrowTransactions/e1'), { status: 'released' }));
   });
+
+  test('superAdmin يقرأ أي مستند ضمان (للوحة النزاعات)', async () => {
+    const admin = ctx('rootAdmin', { role: 'superAdmin', tenantId: '*' });
+    await assertSucceeds(getDoc(doc(admin, 'escrowTransactions/e1')));
+  });
+
+  test('superAdmin لا يكتب مباشرة على الضمان (عبر الدوال فقط)', async () => {
+    const admin = ctx('rootAdmin', { role: 'superAdmin', tenantId: '*' });
+    await assertFails(updateDoc(doc(admin, 'escrowTransactions/e1'), { status: 'released' }));
+  });
 });
