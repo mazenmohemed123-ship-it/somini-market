@@ -43,7 +43,7 @@ const openChat = onCall({ region: REGION }, async (request) => {
     };
     await chatRef.set(meta);
     // فرع RTDB للمشاركين (تُستخدم في قواعد RTDB)
-    await rtdb.ref(`chats/${chatId}/metadata/participants`).set({
+    await rtdb().ref(`chats/${chatId}/metadata/participants`).set({
       [uid]: true,
       [peerId]: true
     });

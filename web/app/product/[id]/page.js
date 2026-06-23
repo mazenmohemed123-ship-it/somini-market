@@ -9,6 +9,7 @@ import { useI18n } from '../../../lib/i18n';
 import { useAuth } from '../../../lib/auth';
 import Navbar from '../../../components/Navbar';
 import Chat from '../../../components/Chat';
+import Reviews from '../../../components/Reviews';
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -116,6 +117,14 @@ export default function ProductPage() {
             />
           </div>
         )}
+
+        <div className="product-page__full">
+          <Reviews
+            productId={id}
+            ratingAvg={product.ratingAvg}
+            ratingCount={product.ratingCount}
+          />
+        </div>
       </main>
     </>
   );

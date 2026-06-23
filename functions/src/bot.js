@@ -6,9 +6,8 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { REGION } = require('../lib/config');
 const { db, FieldValue, Timestamp } = require('../lib/admin');
-// natural متاحة لتحليل لغوي أعمق مستقبلاً (stemming/تصنيف)؛
-// المنطق الحالي قائم على تطبيع عربي + مطابقة كلمات مفتاحية.
-require('natural');
+// المنطق قائم على تطبيع عربي مخصّص + مطابقة كلمات مفتاحية موزونة،
+// وهو أدق للعربية من مجزّئات natural العامة ولا يحتاج أي مكتبة LLM.
 
 // تطبيع النص العربي (إزالة التشكيل وتوحيد الألف/الياء/التاء المربوطة).
 function normalizeAr(text) {
@@ -26,8 +25,10 @@ function normalizeAr(text) {
 // قاموس النوايا: كل نية لها كلمات مفتاحية (تُطابَق بعد التطبيع).
 const INTENTS = [
   {
+    // البحث يتطلب كلمة فعل صريحة (لا الاسم العام "منتج" حتى لا يتعارض
+    // مع نوايا مثل "كيف أرجع منتج؟").
     name: 'search_products',
-    keywords: ['ابحث', 'بحث', 'دور', 'عايز', 'اريد', 'منتج', 'منتجات', 'search', 'find'],
+    keywords: ['ابحث', 'بحث', 'دور', 'عايز', 'اريد', 'search', 'find'],
     needsQuery: true
   },
   {

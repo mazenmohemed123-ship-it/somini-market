@@ -11,16 +11,24 @@
     "shell": "firebase functions:shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
+    "test": "firebase emulators:exec --only firestore,database \"jest\"",
+    "test:unit": "jest test/bot.test.js test/orders.test.js",
+    "test:integration": "firebase emulators:exec --only functions,firestore,auth,database \"jest --config jest.integration.config.js\"",
     "lint": "echo \"(add eslint if desired)\""
   },
   "dependencies": {
-    "firebase-admin": "^12.6.0",
-    "firebase-functions": "^6.1.0",
     "@google-cloud/secret-manager": "^5.6.0",
     "@google-cloud/tasks": "^5.5.0",
     "axios": "^1.7.7",
     "csv-parse": "^5.5.6",
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^6.1.0",
     "natural": "^8.0.1"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "firebase": "^12.15.0",
+    "jest": "^30.4.2"
+  }
 }

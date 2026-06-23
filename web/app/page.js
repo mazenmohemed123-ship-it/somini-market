@@ -93,6 +93,11 @@ export default function HomePage() {
                   <span className="card__badge">
                     {p.condition === 'new' ? t('home.new') : t('home.used')}
                   </span>
+                  {p.ratingCount > 0 && (
+                    <span className="card__rating">
+                      {' '}★ {p.ratingAvg} ({p.ratingCount})
+                    </span>
+                  )}
                 </div>
               </Link>
             ))}

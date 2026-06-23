@@ -4,14 +4,13 @@ import Providers from './providers';
 export const metadata = {
   title: 'سومني ماركت | Somni Market',
   description: 'سوق آمن متعدد البائعين بنظام ضمان كامل',
-  manifest: '/manifest.json',
-  themeColor: '#0f766e'
+  manifest: '/manifest.json'
 };
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0f766e'
+  themeColor: '#14b8a6'
 };
 
 export default function RootLayout({ children }) {

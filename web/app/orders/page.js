@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import {
   collection, query, where, orderBy, getDocs, doc, getDoc
 } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions } from '../../lib/firebase';
 import { useAuth } from '../../lib/auth';
 import { useI18n } from '../../lib/i18n';
 import Navbar from '../../components/Navbar';
@@ -45,6 +46,15 @@ export default function OrdersPage() {
     })();
   }, [user, loading]);
 
+  const confirmReceipt = async (orderId) => {
+    try {
+      await httpsCallable(functions, 'updateOrderStatus')({ orderId, status: 'delivered' });
+      setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: 'delivered' } : o)));
+    } catch (e) {
+      alert(e.message || t('common.error'));
+    }
+  };
+
   if (loading || fetching) return (<><Navbar /><main className="container">{t('common.loading')}</main></>);
   if (!user) return (<><Navbar /><main className="container"><p>سجّل الدخول لعرض طلباتك.</p></main></>);
 
@@ -63,6 +73,11 @@ export default function OrdersPage() {
             </div>
             {o.escrowId && escrows[o.escrowId] && (
               <EscrowPanel escrow={escrows[o.escrowId]} />
+            )}
+            {!o.escrowId && o.status === 'shipped' && (
+              <button className="btn btn--primary" onClick={() => confirmReceipt(o.id)}>
+                ✅ تأكيد الاستلام
+              </button>
             )}
           </div>
         ))}

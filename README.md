@@ -87,10 +87,32 @@ cd functions
 npm install
 ```
 
-### 5) التشغيل المحلي (Emulators)
+### 5) التشغيل المحلي (Emulators) — كل شيء يعمل داخل Firebase
 ```bash
-firebase emulators:start
+firebase emulators:start          # Auth + Firestore + RTDB + Functions + Storage + Hosting
 ```
+ولربط الفرونت بالـ Emulators تلقائياً، اضبط في `web/.env.local`:
+```
+NEXT_PUBLIC_USE_EMULATORS=true
+```
+عندها يتصل الفرونت بـ Firebase المحلي بالكامل دون أي مفاتيح إنتاج.
+
+## 🧪 الاختبارات
+
+النظام مغطّى باختبارات تعمل **داخل Firebase Emulator** فعلياً:
+
+```bash
+cd functions
+npm test               # 28 اختبار: وحدة البوت + انتقالات الطلب + قواعد أمان Firestore
+npm run test:integration   # اختبار end-to-end: استدعاء Cloud Function حقيقية عبر الـ emulator
+```
+
+| الملف | يغطّي |
+|-------|-------|
+| `test/bot.test.js` | تطبيع عربي + كشف نية البوت (9) |
+| `test/orders.test.js` | انتقالات حالة الطلب المسموحة (7) |
+| `test/firestore-rules.test.js` | عزل tenant + الأدوار + المستندات المالية للقراءة فقط (12) |
+| `test/integration.test.js` | Auth → Function → Firestore فعلياً (2) |
 
 ### 6) النشر
 ```bash
@@ -137,6 +159,14 @@ firebase deploy --only hosting
 - مفاتيح REST API تُخزَّن **مجزّأة (SHA-256)** في `apiIntegrations`.
 
 ---
+
+## ✨ مزايا مُضافة
+- **دورة حياة الطلب** (`updateOrderStatus`): البائع يشحن، المشتري يؤكّد الاستلام،
+  بانتقالات صارمة لكل دور.
+- **تقييمات المنتجات** (`addReview`): تقييم 1–5 بعد شراء موثّق، مع تحديث متوسط
+  المنتج ذرّياً وعرضه على البطاقات وصفحة المنتج.
+- **صندوق محادثات** (`/chats`): قائمة محادثات لحظية مع عدّاد غير المقروء.
+- **تصميم فاتح** مشرق (تركواز/زمردي ناعم) + ربط تلقائي بالـ Emulators للتطوير.
 
 ## 🗺️ خارطة طريق (لم تُنفَّذ بعد)
 - استرجاع Paymob الفعلي (`refunds` تُسجَّل كـ pending حالياً).

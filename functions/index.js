@@ -41,6 +41,14 @@ exports.markChatRead = chat.markChatRead;
 const bot = require('./src/bot');
 exports.assistantBot = bot.assistantBot;
 
+// --- دورة حياة الطلب ---
+const orders = require('./src/orders');
+exports.updateOrderStatus = orders.updateOrderStatus;
+
+// --- تقييمات المنتجات ---
+const reviews = require('./src/reviews');
+exports.addReview = reviews.addReview;
+
 // --- إحصائيات لوحة التحكم ---
 const stats = require('./src/stats');
 exports.sellerDashboard = stats.sellerDashboard;

@@ -17,6 +17,7 @@ export default function Navbar() {
       <nav className="navbar__links">
         <Link href="/">{t('nav.home')}</Link>
         {user && <Link href="/orders">{t('nav.orders')}</Link>}
+        {user && <Link href="/chats">💬</Link>}
         {isSeller && <Link href="/seller/dashboard">{t('nav.dashboard')}</Link>}
         {!isSeller && <Link href="/seller/start">{t('nav.sell')}</Link>}
         <select
