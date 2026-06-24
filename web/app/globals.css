@@ -49,17 +49,24 @@ html, body {
   background: transparent;
 }
 
-/* ===== خلفية الغابة (SVG) ===== */
+/* ===== خلفية الغابة (صورة حقيقية) ===== */
 .forest-bg {
   position: fixed;
   inset: 0;
   z-index: -2;
   overflow: hidden;
 }
+.forest-bg__photo {
+  position: absolute;
+  inset: 0;
+  background: url('/forest-bg.jpg') center center / cover no-repeat;
+  background-attachment: fixed;
+}
 .forest-bg__svg { width: 100%; height: 100%; display: block; }
 .forest-bg__overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(8,23,14,0.25) 0%, rgba(8,23,14,0.55) 100%);
+  /* تعتيم متدرّج عشان النصوص والكروت تبان فوق الصورة */
+  background: linear-gradient(180deg, rgba(8,23,14,0.45) 0%, rgba(8,23,14,0.62) 55%, rgba(6,18,11,0.78) 100%);
 }
 .forest-bg__bokeh { position: absolute; inset: 0; }
 .forest-bg__bokeh span {

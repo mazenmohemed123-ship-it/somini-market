@@ -5,9 +5,10 @@ import { createContext, useContext, useEffect, useState } from 'react';
 const ThemeContext = createContext({ theme: 'light', setTheme: () => {}, toggle: () => {} });
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light');
+  // الافتراضي = غابة (forest) عشان تظهر خلفية الغابة لكل زائر جديد
+  const [theme, setTheme] = useState('forest');
 
-  // استرجاع الثيم المحفوظ
+  // استرجاع الثيم المحفوظ (لو المستخدم اختار سابقاً)
   useEffect(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('somini-theme') : null;
     if (saved === 'light' || saved === 'forest') {
