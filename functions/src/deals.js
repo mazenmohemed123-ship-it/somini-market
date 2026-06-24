@@ -17,10 +17,14 @@ const initiateDeal = onCall({ region: REGION }, async (request) => {
   const buyerId = request.auth?.uid;
   if (!buyerId) throw new HttpsError('unauthenticated', 'يجب تسجيل الدخول.');
 
-  const { sellerId, productId, quantity, proposedPrice, description } = request.data || {};
+  const { sellerId, productId, quantity, proposedPrice, description, incoterm } = request.data || {};
   if (!sellerId || !productId || !quantity || !proposedPrice) {
     throw new HttpsError('invalid-argument', 'مطلوب: sellerId, productId, quantity, proposedPrice.');
   }
+
+  // شرط التسليم التجاري (اختياري للبيع المحلي، مهم لصفقات التصدير: FOB/CIF...)
+  const ALLOWED_INCOTERMS = ['EXW', 'FOB', 'CIF', 'CFR', 'DAP', 'DDP', ''];
+  const dealIncoterm = incoterm && ALLOWED_INCOTERMS.includes(incoterm) ? incoterm : '';
 
   // التحقق من KYC للمشتري
   const buyerDoc = await db.collection('users').doc(buyerId).get();
@@ -65,6 +69,7 @@ const initiateDeal = onCall({ region: REGION }, async (request) => {
     totalAmount: null,
     platformFee: null,
     description: description || '',
+    incoterm: dealIncoterm,
     status: 'negotiation', // negotiation → terms_agreed → milestones_created → awaiting_admin → approved → in_progress → completed
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
@@ -359,9 +364,15 @@ const completeMilestone = onCall({ region: REGION }, async (request) => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError('unauthenticated', 'يجب تسجيل الدخول.');
 
-  const { milestoneId, completedBy } = request.data || {};
+  const { milestoneId, completedBy, evidenceUrl, evidenceNote } = request.data || {};
   if (!milestoneId || !['seller', 'buyer'].includes(completedBy)) {
     throw new HttpsError('invalid-argument', 'مطلوب: milestoneId, completedBy (seller/buyer).');
+  }
+
+  // جوهر منع النصب (المستند §3.2 و§5.3): لا إفراج/إنهاء لأي مرحلة دون دليل فعلي مرفوع.
+  // البائع ملزم برفع دليل (مستند شحن/صورة تسليم/تأكيد ميناء) عند إنهاء المرحلة — لا تأكيد كلامي.
+  if (completedBy === 'seller' && (!evidenceUrl || typeof evidenceUrl !== 'string')) {
+    throw new HttpsError('failed-precondition', 'يجب رفع دليل (مستند/صورة) لإنهاء المرحلة. لا يُقبل تأكيد بدون دليل.');
   }
 
   const milestoneDoc = await db.collection('dealMilestones').doc(milestoneId).get();
@@ -379,11 +390,40 @@ const completeMilestone = onCall({ region: REGION }, async (request) => {
     throw new HttpsError('permission-denied', 'المشتري فقط يمكنه تأكيد الاستكمال.');
   }
 
+  // المشتري لا يؤكد مرحلة إلا بعد أن يرفع البائع دليلها (يمنع التأكيد قبل وجود إثبات)
+  if (completedBy === 'buyer' && milestone.status !== 'completed_by_seller') {
+    throw new HttpsError('failed-precondition', 'لا يمكن التأكيد قبل أن ينهي البائع المرحلة ويرفع دليلها.');
+  }
+
   const newStatus = completedBy === 'seller' ? 'completed_by_seller' : 'completed';
 
-  await db.collection('dealMilestones').doc(milestoneId).update({
+  const updatePayload = {
     status: newStatus,
     completedAt: newStatus === 'completed' ? FieldValue.serverTimestamp() : milestone.completedAt
+  };
+
+  // حفظ الدليل ضمن المرحلة (append سجل في مصفوفة الأدلة)
+  if (completedBy === 'seller') {
+    updatePayload.evidence = {
+      url: evidenceUrl,
+      note: evidenceNote || '',
+      uploadedBy: uid,
+      uploadedAt: Date.now()
+    };
+  }
+
+  await db.collection('dealMilestones').doc(milestoneId).update(updatePayload);
+
+  // سجل غير قابل للحذف لكل خطوة دليل/تأكيد (audit log append-only)
+  const auditRef = db.collection('audit_log').doc();
+  await auditRef.set({
+    timestamp: FieldValue.serverTimestamp(),
+    action: completedBy === 'seller' ? 'milestone_evidence_submitted' : 'milestone_confirmed_by_buyer',
+    actor: uid,
+    target: 'milestone',
+    targetId: milestoneId,
+    details: { dealId: deal.dealId, milestoneTitle: milestone.title, newStatus },
+    evidence: completedBy === 'seller' ? { url: evidenceUrl, note: evidenceNote || '' } : null
   });
 
   if (completedBy === 'seller') {

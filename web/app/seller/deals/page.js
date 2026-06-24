@@ -4,11 +4,12 @@
 import { useState, useEffect } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import Link from 'next/link';
-import { functions, db } from '../../../lib/firebase';
+import { functions, db, storage } from '../../../lib/firebase';
 import { useAuth } from '../../../lib/auth';
 import { useI18n } from '../../../lib/i18n';
 import Navbar from '../../../components/Navbar';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function SellerDealsPage() {
   const { user, role } = useAuth();
@@ -19,6 +20,9 @@ export default function SellerDealsPage() {
   const [negotiations, setNegotiations] = useState([]);
   const [milestones, setMilestones] = useState([]);
   const [msg, setMsg] = useState(null);
+  const [evidenceFiles, setEvidenceFiles] = useState({}); // { [milestoneId]: File }
+  const [evidenceNotes, setEvidenceNotes] = useState({}); // { [milestoneId]: string }
+  const [uploadingId, setUploadingId] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -81,14 +85,34 @@ export default function SellerDealsPage() {
     }
   };
 
+  // إنهاء المرحلة مع رفع دليل إلزامي (مستند/صورة) — جوهر منع النصب
   const handleCompleteMilestone = async (milestoneId) => {
+    const file = evidenceFiles[milestoneId];
+    if (!file) {
+      setMsg('❌ يجب اختيار ملف دليل (مستند شحن / صورة تسليم) قبل إنهاء المرحلة.');
+      return;
+    }
     try {
+      setUploadingId(milestoneId);
+      // رفع الدليل إلى Storage تحت مسار خاص بالصفقة
+      const path = `deal_evidence/${selectedDeal.id}/${milestoneId}/${Date.now()}_${file.name}`;
+      const sref = storageRef(storage, path);
+      await uploadBytes(sref, file);
+      const evidenceUrl = await getDownloadURL(sref);
+
       const completeMilestone = httpsCallable(functions, 'completeMilestone');
-      await completeMilestone({ milestoneId, completedBy: 'seller' });
-      setMsg('✅ تم تعليم المرحلة كمنتهية');
+      await completeMilestone({
+        milestoneId,
+        completedBy: 'seller',
+        evidenceUrl,
+        evidenceNote: evidenceNotes[milestoneId] || ''
+      });
+      setMsg('✅ تم إنهاء المرحلة ورفع الدليل');
       handleSelectDeal(selectedDeal.id);
     } catch (err) {
       setMsg('❌ ' + (err.message || 'خطأ في تحديث المرحلة'));
+    } finally {
+      setUploadingId(null);
     }
   };
 
@@ -247,20 +271,55 @@ export default function SellerDealsPage() {
                         )}
 
                         {mile.status === 'in_progress' && (
-                          <button
-                            className="btn btn--small btn--primary"
-                            onClick={() => handleCompleteMilestone(mile.id)}
-                          >
-                            تعليم كمنتهية
-                          </button>
+                          <div style={{ borderTop: '1px dashed var(--border)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '0.5rem' }}>
+                              📎 ارفع دليل الإنجاز (مستند شحن / صورة تسليم / تأكيد ميناء) — إلزامي
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/*,application/pdf"
+                              onChange={(e) => setEvidenceFiles(prev => ({ ...prev, [mile.id]: e.target.files?.[0] || null }))}
+                              style={{ marginBottom: '0.5rem', fontSize: '0.8rem', width: '100%' }}
+                            />
+                            <input
+                              type="text"
+                              placeholder="ملاحظة على الدليل (اختياري)"
+                              value={evidenceNotes[mile.id] || ''}
+                              onChange={(e) => setEvidenceNotes(prev => ({ ...prev, [mile.id]: e.target.value }))}
+                              style={{ marginBottom: '0.5rem', fontSize: '0.8rem', width: '100%', padding: '0.4rem' }}
+                            />
+                            <button
+                              className="btn btn--small btn--primary"
+                              disabled={uploadingId === mile.id || !evidenceFiles[mile.id]}
+                              onClick={() => handleCompleteMilestone(mile.id)}
+                            >
+                              {uploadingId === mile.id ? 'جارٍ الرفع…' : '📤 إنهاء المرحلة برفع الدليل'}
+                            </button>
+                          </div>
                         )}
 
                         {mile.status === 'completed_by_seller' && (
-                          <span style={{ color: 'var(--text-light)' }}>⏳ في انتظار تأكيد المشتري</span>
+                          <div>
+                            <span style={{ color: 'var(--text-light)' }}>⏳ في انتظار تأكيد المشتري</span>
+                            {mile.evidence?.url && (
+                              <a href={mile.evidence.url} target="_blank" rel="noopener noreferrer"
+                                 style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--teal)' }}>
+                                📎 عرض الدليل المرفوع
+                              </a>
+                            )}
+                          </div>
                         )}
 
                         {mile.status === 'completed' && (
-                          <span style={{ color: 'var(--success)' }}>✅ مؤكدة من المشتري</span>
+                          <div>
+                            <span style={{ color: 'var(--success)' }}>✅ مؤكدة من المشتري</span>
+                            {mile.evidence?.url && (
+                              <a href={mile.evidence.url} target="_blank" rel="noopener noreferrer"
+                                 style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--teal)' }}>
+                                📎 عرض الدليل
+                              </a>
+                            )}
+                          </div>
                         )}
                       </div>
                     ))}

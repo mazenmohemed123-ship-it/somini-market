@@ -224,6 +224,11 @@ export default function AdminDealsPage() {
                   <div>
                     <span style={{ fontWeight: '600' }}>الكمية:</span> {selectedDeal.quantity}
                   </div>
+                  {selectedDeal.incoterm && (
+                    <div>
+                      <span style={{ fontWeight: '600' }}>شرط التسليم:</span> {selectedDeal.incoterm}
+                    </div>
+                  )}
                   <div>
                     <span style={{ fontWeight: '600' }}>السعر المتفق:</span> {selectedDeal.agreedPrice || selectedDeal.proposedPrice} EGP
                   </div>
@@ -267,13 +272,25 @@ export default function AdminDealsPage() {
                         <div style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
                           {mile.percentage}% - {mile.amount} EGP
                         </div>
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-light)', marginBottom: '1rem' }}>
+                        <div style={{ fontSize: '0.875rem', color: 'var(--text-light)', marginBottom: '0.5rem' }}>
                           الحالة: <strong>{mile.status}</strong>
                         </div>
+
+                        {mile.evidence?.url ? (
+                          <a href={mile.evidence.url} target="_blank" rel="noopener noreferrer"
+                             style={{ display: 'block', marginBottom: '1rem', fontSize: '0.85rem', color: 'var(--teal)' }}>
+                            📎 مراجعة الدليل المرفوع{mile.evidence.note ? ` — ${mile.evidence.note}` : ''}
+                          </a>
+                        ) : (
+                          <div style={{ fontSize: '0.8rem', color: 'var(--danger)', marginBottom: '1rem' }}>
+                            ⚠️ لا يوجد دليل — لا تُحرّر الدفعة بدون مراجعة دليل فعلي
+                          </div>
+                        )}
 
                         {mile.status === 'completed' && (
                           <button
                             className="btn btn--small btn--primary"
+                            disabled={!mile.evidence?.url}
                             onClick={() => handleReleaseMilestone(mile.id)}
                           >
                             💰 تحرير الدفعة

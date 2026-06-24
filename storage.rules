@@ -42,6 +42,16 @@ service firebase.storage {
       allow write: if isSignedIn() && request.auth.uid == uid && isImage();
     }
 
+    // أدلة مراحل الصفقات (مستند شحن/صورة تسليم/تأكيد ميناء)
+    // يرفعها أطراف الصفقة المسجّلون (صورة أو PDF حتى 15MB)، وتُقرأ عند تسجيل الدخول
+    match /deal_evidence/{dealId}/{milestoneId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn()
+        && (request.resource.contentType.matches('image/.*')
+            || request.resource.contentType == 'application/pdf')
+        && request.resource.size < 15 * 1024 * 1024;
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }

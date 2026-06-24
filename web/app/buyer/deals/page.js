@@ -305,16 +305,36 @@ export default function BuyerDealsPage() {
                         </div>
 
                         {mile.status === 'completed_by_seller' && (
-                          <button
-                            className="btn btn--small btn--primary"
-                            onClick={() => handleCompleteMilestone(mile.id)}
-                          >
-                            تأكيد الاستكمال
-                          </button>
+                          <div>
+                            {mile.evidence?.url ? (
+                              <a href={mile.evidence.url} target="_blank" rel="noopener noreferrer"
+                                 style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--teal)' }}>
+                                📎 راجع دليل البائع{mile.evidence.note ? ` — ${mile.evidence.note}` : ''}
+                              </a>
+                            ) : (
+                              <div style={{ fontSize: '0.8rem', color: 'var(--danger)', marginBottom: '0.5rem' }}>
+                                ⚠️ لا يوجد دليل مرفوع
+                              </div>
+                            )}
+                            <button
+                              className="btn btn--small btn--primary"
+                              onClick={() => handleCompleteMilestone(mile.id)}
+                            >
+                              تأكيد الاستكمال بعد مراجعة الدليل
+                            </button>
+                          </div>
                         )}
 
                         {mile.status === 'completed' && (
-                          <span style={{ color: 'var(--success)' }}>✅ موثقة ومؤكدة</span>
+                          <div>
+                            <span style={{ color: 'var(--success)' }}>✅ موثقة ومؤكدة</span>
+                            {mile.evidence?.url && (
+                              <a href={mile.evidence.url} target="_blank" rel="noopener noreferrer"
+                                 style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--teal)' }}>
+                                📎 عرض الدليل
+                              </a>
+                            )}
+                          </div>
                         )}
 
                         {mile.status === 'released' && (

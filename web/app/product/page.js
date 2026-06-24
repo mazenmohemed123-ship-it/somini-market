@@ -22,6 +22,12 @@ function ProductView() {
   const [iframeUrl, setIframeUrl] = useState(null);
   const [showChat, setShowChat] = useState(false);
   const [paying, setPaying] = useState(false);
+  // صفقة تجارية (تفاوض)
+  const [showDeal, setShowDeal] = useState(false);
+  const [dealPrice, setDealPrice] = useState('');
+  const [dealIncoterm, setDealIncoterm] = useState('');
+  const [dealNote, setDealNote] = useState('');
+  const [dealBusy, setDealBusy] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -47,6 +53,30 @@ function ProductView() {
       alert(e.message || t('common.error'));
     } finally {
       setPaying(false);
+    }
+  };
+
+  const startDeal = async () => {
+    if (!user) { window.location.href = '/login'; return; }
+    const price = parseFloat(dealPrice);
+    if (!price || price <= 0) { alert('أدخل سعراً مقترحاً صحيحاً.'); return; }
+    setDealBusy(true);
+    try {
+      const res = await httpsCallable(functions, 'initiateDeal')({
+        sellerId: product.sellerId,
+        productId: id,
+        quantity: qty,
+        proposedPrice: price,
+        description: dealNote,
+        incoterm: dealIncoterm
+      });
+      alert('✅ تم إرسال عرض الصفقة للبائع. تابعها من صفحة "صفقاتي".');
+      setShowDeal(false);
+      if (res?.data?.dealId) window.location.href = '/buyer/deals';
+    } catch (e) {
+      alert(e.message || t('common.error'));
+    } finally {
+      setDealBusy(false);
     }
   };
 
@@ -100,8 +130,50 @@ function ProductView() {
             <button className="btn btn--ghost" onClick={() => setShowChat((s) => !s)}>
               💬 {t('product.chatSeller')}
             </button>
+            <button className="btn btn--ghost" onClick={() => setShowDeal(true)}>
+              💼 بدء صفقة تجارية (تفاوض)
+            </button>
           </div>
         </div>
+
+        {showDeal && (
+          <div className="paymob-modal" onClick={() => setShowDeal(false)}>
+            <div className="paymob-modal__inner" onClick={(e) => e.stopPropagation()} style={{ padding: '1.5rem', maxWidth: '460px' }}>
+              <h2 style={{ marginTop: 0 }}>💼 صفقة تجارية</h2>
+              <p className="muted" style={{ fontSize: '0.85rem' }}>
+                تتطلب التحقق من الهوية (KYC) للطرفين. تفاوض على السعر والكمية ثم مراحل دفع موثّقة بالأدلة.
+              </p>
+              <div className="form-stack" style={{ gap: '0.75rem' }}>
+                <label>الكمية:
+                  <input type="number" min={1} max={product.quantity} value={qty}
+                    onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))} />
+                </label>
+                <label>السعر المقترح للوحدة (EGP):
+                  <input type="number" min={1} value={dealPrice}
+                    onChange={(e) => setDealPrice(e.target.value)} placeholder="مثال: 1200" />
+                </label>
+                <label>شرط التسليم (Incoterm):
+                  <select value={dealIncoterm} onChange={(e) => setDealIncoterm(e.target.value)}>
+                    <option value="">— غير محدد (بيع محلي) —</option>
+                    <option value="EXW">EXW — تسليم المصنع</option>
+                    <option value="FOB">FOB — تسليم ظهر السفينة</option>
+                    <option value="CFR">CFR — التكلفة والشحن</option>
+                    <option value="CIF">CIF — التكلفة والتأمين والشحن</option>
+                    <option value="DAP">DAP — التسليم في المكان</option>
+                    <option value="DDP">DDP — التسليم خالص الرسوم</option>
+                  </select>
+                </label>
+                <label>ملاحظات (اختياري):
+                  <textarea value={dealNote} onChange={(e) => setDealNote(e.target.value)} rows={2}
+                    placeholder="شروط إضافية، تفاصيل الشحن…" />
+                </label>
+                <button className="btn btn--primary" onClick={startDeal} disabled={dealBusy}>
+                  {dealBusy ? t('common.loading') : '📤 إرسال العرض للبائع'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {iframeUrl && (
           <div className="paymob-modal" onClick={() => setIframeUrl(null)}>
