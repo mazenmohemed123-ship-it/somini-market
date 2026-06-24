@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useI18n } from '../lib/i18n';
 import { useAuth } from '../lib/auth';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const { t, lang, setLang } = useI18n();
@@ -22,6 +23,7 @@ export default function Navbar() {
         {isSeller && <Link href="/seller/dashboard">{t('nav.dashboard')}</Link>}
         {!isSeller && !isAdmin && <Link href="/seller/start">{t('nav.sell')}</Link>}
         {isAdmin && <Link href="/admin" className="navbar__admin">🛡️ الأدمن</Link>}
+        <ThemeToggle />
         <select
           className="navbar__lang"
           value={lang}
