@@ -1,5 +1,5 @@
 'use client';
-// تسجيل الدخول/الإنشاء عبر البريد + إنشاء ملف المستخدم في Firestore.
+// تسجيل الدخول/الإنشاء عبر البريد + Google OAuth + إنشاء ملف المستخدم في Firestore.
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -11,6 +11,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { useI18n } from '../../lib/i18n';
 import Navbar from '../../components/Navbar';
+import GoogleSignIn from '../../components/GoogleSignIn';
 
 export default function LoginPage() {
   const { t } = useI18n();
@@ -52,7 +53,16 @@ export default function LoginPage() {
     <>
       <Navbar />
       <main className="container auth">
-        <h1>{mode === 'login' ? t('nav.login') : t('nav.sell')}</h1>
+        <div style={{ maxWidth: '420px', margin: '0 auto' }}>
+          <h1 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>{mode === 'login' ? t('nav.login') : t('nav.sell')}</h1>
+
+          {/* Google Sign-In */}
+          <GoogleSignIn variant="button" />
+
+          <div style={{ textAlign: 'center', margin: '1.5rem 0', color: 'var(--muted)' }}>
+            أو استخدم بريدك الإلكتروني
+          </div>
+
         <form onSubmit={submit} className="auth__form">
           {mode === 'signup' && (
             <input
@@ -84,6 +94,7 @@ export default function LoginPage() {
         <button className="link-btn" onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}>
           {mode === 'login' ? 'ليس لديك حساب؟ سجّل الآن' : 'لديك حساب؟ سجّل الدخول'}
         </button>
+        </div>
       </main>
     </>
   );
