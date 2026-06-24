@@ -14,6 +14,12 @@ exports.createTenant = tenants.createTenant;
 exports.setUserRole = tenants.setUserRole;
 exports.onUserCreate = tenants.onUserCreate;
 
+// --- KYC (التحقق من الهوية) ---
+const kyc = require('./src/kyc');
+exports.submitKyc = kyc.submitKyc;
+exports.approveKyc = kyc.approveKyc;
+exports.rejectKyc = kyc.rejectKyc;
+
 // --- المنتجات ---
 const products = require('./src/products');
 exports.createProduct = products.createProduct;

@@ -33,6 +33,7 @@ export default function Navbar() {
         <Link href="/">{t('nav.home')}</Link>
         {user && <Link href="/orders">{t('nav.orders')}</Link>}
         {user && <Link href="/chats">💬</Link>}
+        {user && !isSeller && <Link href="/kyc" style={{ color: 'var(--teal)', fontWeight: '600' }}>🔐 KYC</Link>}
         {isSeller && <Link href="/seller/dashboard">{t('nav.dashboard')}</Link>}
         {!isSeller && !isAdmin && <Link href="/seller/start">{t('nav.sell')}</Link>}
         {isAdmin && <Link href="/admin" className="navbar__admin">🛡️ الأدمن</Link>}

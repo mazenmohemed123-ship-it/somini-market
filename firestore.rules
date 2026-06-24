@@ -214,6 +214,23 @@ service cloud.firestore {
       allow update, delete: if isOwner(resource.data.userId) || isSuperAdmin();
     }
 
+    // ---------- KYC submissions (التحقق من الهوية) ----------
+    match /kyc_submissions/{submissionId} {
+      allow read: if isSignedIn() && (
+        resource.data.uid == request.auth.uid || isSuperAdmin()
+      );
+      allow create: if false; // Cloud Function فقط (submitKyc)
+      allow update: if isSuperAdmin(); // الأدمن يوافق/يرفض عبر Cloud Function
+      allow delete: if isSuperAdmin();
+    }
+
+    // ---------- audit_log (سجل الأنشطة الحساسة — append-only) ----------
+    match /audit_log/{logId} {
+      allow read: if isSuperAdmin() || isSupport();
+      allow create: if false; // Cloud Function فقط
+      allow update, delete: if false; // غير قابل للتعديل/الحذف (append-only)
+    }
+
     // منع أي وصول غير معرّف صراحةً
     match /{document=**} {
       allow read, write: if false;
