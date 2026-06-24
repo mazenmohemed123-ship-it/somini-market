@@ -313,98 +313,175 @@ a { color: inherit; text-decoration: none; }
 [data-theme="forest"] .filters input::placeholder,
 [data-theme="forest"] .auth__form input::placeholder { color: rgba(240,253,244,0.6); }
 
-/* ===== بطاقة تسجيل الدخول (forest glass — مطابقة للموكب) ===== */
+/* ============================================================= */
+/* ===== شاشة المصادقة — متوافقة بالكامل مع الثيمين ===== */
+/* الثيم الفاتح: تدرّج أزرق فاتح + بطاقة بيضاء (مطابق للموكب 1).   */
+/* ثيم الغابة: خلفية الغابة العامة (SVG) + بطاقة زجاجية (موكب 2). */
+/* القيم تعتمد على متغيّرات لتتبدّل تلقائياً مع زر الثيم.          */
+/* ============================================================= */
+:root {
+  /* رموز شاشة المصادقة — الوضع الفاتح */
+  --auth-screen-bg: linear-gradient(135deg, #eaf2ff 0%, #dbe8fb 45%, #eef4ff 100%);
+  --auth-card-bg: #ffffff;
+  --auth-card-border: #e5e7eb;
+  --auth-card-shadow: 0 20px 50px rgba(37, 99, 235, 0.12);
+  --auth-brand-color: #1d4ed8;
+  --auth-brand-sub: #64748b;
+  --auth-brand-small: #94a3b8;
+  --auth-accent: #1d4ed8;
+  --auth-tab-idle: #6b7280;
+  --auth-label: #6b7280;
+  --auth-input-bg: #f9fafb;
+  --auth-input-border: #d1d5db;
+  --auth-input-text: #1a1a2e;
+  --auth-input-placeholder: #9ca3af;
+  --auth-btn-bg: #ffffff;
+  --auth-btn-border: #cbd5e1;
+  --auth-btn-text: #1d4ed8;
+  --auth-terms: #4b5563;
+  --auth-footer-link: #64748b;
+  --auth-copy: #94a3b8;
+  --auth-divider: #e5e7eb;
+}
+/* تجاوزات ثيم الغابة لشاشة المصادقة */
+[data-theme="forest"] {
+  /* الخلفية شفافة لتظهر خلفية الغابة العامة (ForestBackground SVG) */
+  --auth-screen-bg: transparent;
+  --auth-card-bg: rgba(255, 255, 255, 0.12);
+  --auth-card-border: rgba(255, 255, 255, 0.22);
+  --auth-card-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  --auth-brand-color: #ffffff;
+  --auth-brand-sub: rgba(255, 255, 255, 0.82);
+  --auth-brand-small: rgba(255, 255, 255, 0.6);
+  --auth-accent: #6ee7b7;
+  --auth-tab-idle: rgba(255, 255, 255, 0.65);
+  --auth-label: rgba(255, 255, 255, 0.8);
+  --auth-input-bg: rgba(255, 255, 255, 0.14);
+  --auth-input-border: rgba(255, 255, 255, 0.28);
+  --auth-input-text: #f0fdf4;
+  --auth-input-placeholder: rgba(240, 253, 244, 0.6);
+  --auth-btn-bg: rgba(255, 255, 255, 0.16);
+  --auth-btn-border: rgba(255, 255, 255, 0.3);
+  --auth-btn-text: #ffffff;
+  --auth-terms: rgba(255, 255, 255, 0.85);
+  --auth-footer-link: rgba(255, 255, 255, 0.8);
+  --auth-copy: rgba(255, 255, 255, 0.65);
+  --auth-divider: rgba(255, 255, 255, 0.2);
+}
+
 .auth-screen {
   min-height: 100vh;
+  min-height: 100dvh;               /* ملاءمة شريط المتصفح على الموبايل */
   display: flex; align-items: center; justify-content: center;
   padding: 1.5rem; position: relative;
-  /* RESTYLED: خلفية غابة داكنة مع تدرّج احتياطي إن لم تتوفر الصورة */
-  background:
-    url('/bg-auth.jpg') center / cover no-repeat,
-    linear-gradient(135deg, #0d1a0d 0%, #1a2a1a 60%, #0a150a 100%);
-  background-size: cover;          /* RESTYLED */
-  background-position: center;     /* RESTYLED */
+  background: var(--auth-screen-bg);
+  transition: background 0.35s ease;
 }
-/* RESTYLED: طبقة bokeh كهرماني دافئ (3 تدرّجات شعاعية) */
+/* طبقة وهج خفيفة: bokeh كهرماني في الغابة، توهّج أزرق في الفاتح */
 .auth-screen::before {
   content: '';
   position: absolute; inset: 0; pointer-events: none; z-index: 0;
   background:
-    radial-gradient(240px circle at 86% 12%, rgba(255,186,99,0.15), transparent 70%),
-    radial-gradient(280px circle at 10% 88%, rgba(255,170,80,0.13), transparent 70%),
+    radial-gradient(420px circle at 84% 8%, rgba(37,99,235,0.08), transparent 70%),
+    radial-gradient(460px circle at 8% 92%, rgba(59,130,246,0.07), transparent 70%);
+  transition: opacity 0.35s ease;
+}
+[data-theme="forest"] .auth-screen::before {
+  background:
+    radial-gradient(240px circle at 86% 12%, rgba(255,186,99,0.18), transparent 70%),
+    radial-gradient(280px circle at 10% 88%, rgba(255,170,80,0.15), transparent 70%),
     radial-gradient(320px circle at 50% 50%, rgba(255,200,120,0.10), transparent 70%);
 }
 .auth-screen > * { position: relative; z-index: 1; }
 
 .auth-card {
   width: 100%; max-width: 440px;
-  /* RESTYLED: solid white card on dark forest background */
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--auth-card-bg);
+  border: 1px solid var(--auth-card-border);
   border-radius: 16px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--auth-card-shadow);
   padding: 2rem;
   animation: fadeUp 0.5s ease;
+  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+/* البطاقة الزجاجية في ثيم الغابة */
+[data-theme="forest"] .auth-card {
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
 }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-/* RESTYLED: نصوص الهوية فوق البطاقة → أبيض (على خلفية الغابة) */
+/* الهوية فوق البطاقة */
 .auth-brand { text-align: center; margin-bottom: 1.5rem; }
-.auth-brand h1 { font-size: 1.8rem; font-weight: 800; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.45); margin: 0 0 0.3rem; }
-.auth-brand p { color: rgba(255,255,255,0.8); font-size: 0.9rem; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
-.auth-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; font-style: italic; }
+.auth-brand h1 {
+  font-size: 1.8rem; font-weight: 800; margin: 0 0 0.3rem;
+  color: var(--auth-brand-color);
+}
+[data-theme="forest"] .auth-brand h1 { text-shadow: 0 2px 10px rgba(0,0,0,0.45); }
+.auth-brand p { color: var(--auth-brand-sub); font-size: 0.9rem; }
+[data-theme="forest"] .auth-brand p { text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+.auth-brand small { color: var(--auth-brand-small); font-size: 0.75rem; font-style: italic; }
 
-/* RESTYLED: مبدّل التبويبات (داخل الكارد الأبيض) */
-.auth-tabs { display: flex; border-bottom: 1px solid #e5e7eb; margin-bottom: 1.5rem; }
+/* مبدّل التبويبات */
+.auth-tabs { display: flex; border-bottom: 1px solid var(--auth-divider); margin-bottom: 1.5rem; }
 .auth-tabs button {
   flex: 1; padding: 0.85rem; background: none; border: none; cursor: pointer;
   font: inherit; font-weight: 600; font-size: 1rem;
-  color: #6b7280;
+  color: var(--auth-tab-idle);
   border-bottom: 2px solid transparent; transition: all 0.2s;
 }
-.auth-tabs button.active { color: #0058bc; font-weight: 700; border-bottom-color: #0058bc; }
+.auth-tabs button.active { color: var(--auth-accent); font-weight: 700; border-bottom-color: var(--auth-accent); }
 
 .auth-field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
-/* RESTYLED: تسميات داكنة داخل الكارد الأبيض */
-.auth-field label { font-size: 0.78rem; font-weight: 600; color: #6b7280; }
+.auth-field label { font-size: 0.78rem; font-weight: 600; color: var(--auth-label); }
 .auth-field input {
   padding: 0.8rem 1rem;
   border-radius: 8px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--auth-input-border);
   font: inherit;
-  background: #f9fafb;
-  color: #1a1a2e;
+  background: var(--auth-input-bg);
+  color: var(--auth-input-text);
   transition: all 0.2s;
 }
-.auth-field input::placeholder { color: #9ca3af; }
-.auth-field input:focus { outline: none; border-color: #0058bc; box-shadow: 0 0 0 3px rgba(0,88,188,0.15); }
+[data-theme="forest"] .auth-field input { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.auth-field input::placeholder { color: var(--auth-input-placeholder); }
+.auth-field input:focus {
+  outline: none; border-color: var(--auth-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--auth-accent) 22%, transparent);
+}
 
 .auth-btn {
   width: 100%; height: 52px;
-  border-radius: 8px; border: 1px solid #d1d5db; cursor: pointer;
+  border-radius: 8px; border: 1px solid var(--auth-btn-border); cursor: pointer;
   font: inherit; font-weight: 700; font-size: 1rem; margin-top: 0.5rem;
-  background: #ffffff; color: #0058bc;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  background: var(--auth-btn-bg); color: var(--auth-btn-text);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
 }
-.auth-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,88,188,0.15); }
+[data-theme="forest"] .auth-btn { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.auth-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px color-mix(in srgb, var(--auth-accent) 22%, transparent);
+}
 .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* RESTYLED: شروط/أخطاء (داخل الكارد الأبيض) */
-.auth-card .terms-check { color: #4b5563; }
-.auth-card .terms-check a { color: #0058bc; }
+/* شروط/أخطاء داخل البطاقة */
+.auth-card .terms-check { color: var(--auth-terms); }
+.auth-card .terms-check a { color: var(--auth-accent); }
 .auth-card .error { color: #dc2626; }
+[data-theme="forest"] .auth-card .error { color: #fca5a5; }
 
-/* RESTYLED: روابط أسفل البطاقة (على خلفية الغابة) */
+/* روابط أسفل البطاقة */
 .auth-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
-.auth-footer a { font-size: 0.78rem; color: rgba(255,255,255,0.8); }
-.auth-copy { text-align: center; margin-top: 1rem; font-size: 0.72rem; color: rgba(255,255,255,0.65); }
+.auth-footer a { font-size: 0.78rem; color: var(--auth-footer-link); }
+.auth-copy { text-align: center; margin-top: 1rem; font-size: 0.72rem; color: var(--auth-copy); }
 
-.auth-toggle-theme { position: absolute; top: 1.25rem; inset-inline-end: 1.25rem; z-index: 2; }
+.auth-toggle-theme { position: absolute; top: 1.25rem; inset-inline-end: 1.25rem; z-index: 5; }
 
-/* RESTYLED: ملاءمة الموبايل */
+/* ملاءمة الموبايل */
 @media (max-width: 480px) {
   .auth-screen { padding: 1rem; }
   .auth-card { padding: 1.4rem; border-radius: 14px; }
+  .auth-brand { margin-top: 3rem; }   /* مساحة لزر الثيم في الأعلى */
   .auth-brand h1 { font-size: 1.5rem; }
   .auth-tabs button { padding: 0.7rem; font-size: 0.95rem; }
   .auth-toggle-theme { top: 0.75rem; inset-inline-end: 0.75rem; }
