@@ -36,3 +36,5 @@ jobs:
           channelId: live
           projectId: somini-market
           entryPoint: .
+        env:
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
