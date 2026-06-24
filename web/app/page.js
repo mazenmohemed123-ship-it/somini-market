@@ -95,7 +95,7 @@ export default function HomePage() {
         ) : (
           <div className="grid">
             {filtered.map((p) => (
-              <Link key={p.id} href={`/product/${p.id}`} className="card">
+              <Link key={p.id} href={`/product?id=${p.id}`} className="card">
                 <div className="card__img">
                   {p.images?.[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element

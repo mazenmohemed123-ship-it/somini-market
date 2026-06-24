@@ -40,7 +40,7 @@ export default function SellerStartPage() {
         ...product,
         price: Number(product.price)
       });
-      router.push(`/product/${res.data.productId}`);
+      router.push(`/product?id=${res.data.productId}`);
     } catch (e) {
       setMsg('⚠️ ' + e.message);
     } finally {

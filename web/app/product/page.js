@@ -1,18 +1,20 @@
 'use client';
 // صفحة المنتج: تفاصيل + شراء فوري (Paymob iframe) + محادثة البائع.
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+// تستقبل معرّف المنتج عبر ?id= لتعمل مع التصدير الثابت (Static Export).
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
-import { db, functions } from '../../../lib/firebase';
-import { useI18n } from '../../../lib/i18n';
-import { useAuth } from '../../../lib/auth';
-import Navbar from '../../../components/Navbar';
-import Chat from '../../../components/Chat';
-import Reviews from '../../../components/Reviews';
+import { db, functions } from '../../lib/firebase';
+import { useI18n } from '../../lib/i18n';
+import { useAuth } from '../../lib/auth';
+import Navbar from '../../components/Navbar';
+import Chat from '../../components/Chat';
+import Reviews from '../../components/Reviews';
 
-export default function ProductPage() {
-  const { id } = useParams();
+function ProductView() {
+  const params = useSearchParams();
+  const id = params.get('id');
   const { t } = useI18n();
   const { user } = useAuth();
   const [product, setProduct] = useState(null);
@@ -22,6 +24,7 @@ export default function ProductPage() {
   const [paying, setPaying] = useState(false);
 
   useEffect(() => {
+    if (!id) return;
     (async () => {
       const snap = await getDoc(doc(db, 'products', id));
       if (snap.exists()) setProduct({ id: snap.id, ...snap.data() });
@@ -127,5 +130,13 @@ export default function ProductPage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function ProductPage() {
+  return (
+    <Suspense fallback={<><Navbar /><main className="container">...</main></>}>
+      <ProductView />
+    </Suspense>
   );
 }
