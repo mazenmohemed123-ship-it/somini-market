@@ -52,7 +52,7 @@ const createProduct = onCall({ region: REGION }, async (request) => {
  * ينشئ المنتجات دفعةً (batched writes) ويسجّل النتيجة في bulkUploadJobs.
  */
 const processBulkUpload = onObjectFinalized(
-  { region: REGION, memory: '512MiB', timeoutSeconds: 300 },
+  { region: REGION, memory: '512MiB', timeoutSeconds: 300, bucket: 'somini-market-storage' },
   async (event) => {
     const filePath = event.data.name || '';
     if (!filePath.startsWith('bulkUploads/')) return;
