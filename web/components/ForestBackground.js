@@ -1,5 +1,5 @@
 'use client';
-// خلفية غابة مبنية بالكامل بـ SVG/CSS — بدون أي صور خارجية.
+// خلفية غابة واقعية مبنية بالكامل بـ SVG/CSS — بدون أي صور خارجية.
 // تظهر فقط في ثيم "forest".
 import { useTheme } from '../lib/theme';
 
@@ -16,101 +16,139 @@ export default function ForestBackground() {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          {/* سماء الغابة المتدرّجة */}
-          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#1d3b2a" />
-            <stop offset="45%" stopColor="#234a31" />
-            <stop offset="100%" stopColor="#0e2419" />
+          {/* سماء الغابة: من أزرق فاتح في الأعلى إلى أخضر داكن أسفل */}
+          <linearGradient id="skyForest" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#2d5a4a" />
+            <stop offset="40%" stopColor="#1f4a3a" />
+            <stop offset="100%" stopColor="#0f2c1f" />
           </linearGradient>
-          {/* ضباب */}
-          <radialGradient id="mist" cx="50%" cy="35%" r="60%">
-            <stop offset="0%" stopColor="#9fd9b0" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#9fd9b0" stopOpacity="0" />
+
+          {/* ضباب: شفاف متدرج من الأعلى */}
+          <radialGradient id="mistForest" cx="50%" cy="20%" r="70%">
+            <stop offset="0%" stopColor="#a8d5ba" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#a8d5ba" stopOpacity="0" />
           </radialGradient>
-          {/* أشعة ضوء */}
-          <linearGradient id="ray" x1="0" y1="0" x2="0.3" y2="1">
-            <stop offset="0%" stopColor="#d8f3c4" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#d8f3c4" stopOpacity="0" />
+
+          {/* أشعة ضوء دافئة من الشمس */}
+          <linearGradient id="sunRay" x1="30%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stopColor="#f5e6a8" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#f5e6a8" stopOpacity="0" />
+          </linearGradient>
+
+          {/* تدرج أرضية الغابة */}
+          <linearGradient id="groundForest" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1a3a2a" />
+            <stop offset="100%" stopColor="#0a1a0f" />
           </linearGradient>
         </defs>
 
         {/* السماء */}
-        <rect width="1440" height="900" fill="url(#sky)" />
+        <rect width="1440" height="900" fill="url(#skyForest)" />
 
-        {/* أشعة الضوء المائلة */}
-        <g opacity="0.7">
-          <polygon points="300,0 520,0 360,900 80,900" fill="url(#ray)" />
-          <polygon points="760,0 900,0 820,900 600,900" fill="url(#ray)" />
-          <polygon points="1100,0 1240,0 1180,900 980,900" fill="url(#ray)" />
+        {/* أشعة الشمس الدافئة */}
+        <g opacity="0.6">
+          <polygon points="250,0 550,0 350,900 50,900" fill="url(#sunRay)" />
+          <polygon points="800,0 1000,0 900,900 650,900" fill="url(#sunRay)" />
         </g>
 
-        {/* الضباب */}
-        <rect width="1440" height="900" fill="url(#mist)" />
+        {/* ضباب الصباح */}
+        <rect width="1440" height="900" fill="url(#mistForest)" />
 
-        {/* طبقة أشجار خلفية (داكنة، بعيدة) */}
-        <g fill="#10301f" opacity="0.85">
-          {treeRow(0, 760, 7, 220, 0.9)}
-        </g>
-        {/* طبقة أشجار وسطى */}
-        <g fill="#0c2719" opacity="0.92">
-          {treeRow(-60, 820, 6, 300, 1.15)}
-        </g>
-        {/* طبقة أشجار أمامية (الأقرب) */}
-        <g fill="#06170e">
-          {treeRow(-120, 900, 5, 380, 1.5)}
+        {/* طبقة أشجار بعيدة جداً (ألوان داكنة جداً) */}
+        <g fill="#0a2415" opacity="0.75">
+          {treeRowRealistic(-200, 650, 8, 180, 1.0)}
         </g>
 
-        {/* أرضية الغابة */}
-        <ellipse cx="720" cy="900" rx="900" ry="120" fill="#06170e" />
+        {/* طبقة أشجار متوسطة البعد */}
+        <g fill="#0f3620" opacity="0.85">
+          {treeRowRealistic(-100, 750, 7, 280, 1.3)}
+        </g>
+
+        {/* طبقة أشجار قريبة (الأمامية) - الأكثر وضوحاً */}
+        <g fill="#0a2415">
+          {treeRowRealistic(0, 850, 6, 400, 1.6)}
+        </g>
+
+        {/* أرضية الغابة مع التفاصيل */}
+        <ellipse cx="720" cy="900" rx="1000" ry="150" fill="url(#groundForest)" />
+
+        {/* نقاط ضوئية على الأرض (أوراق متناثرة تعكس الضوء) */}
+        <g opacity="0.3">
+          <circle cx="200" cy="820" r="3" fill="#d4af77" />
+          <circle cx="350" cy="840" r="2.5" fill="#d4af77" />
+          <circle cx="520" cy="835" r="2" fill="#d4af77" />
+          <circle cx="680" cy="850" r="3" fill="#d4af77" />
+          <circle cx="900" cy="830" r="2.5" fill="#d4af77" />
+          <circle cx="1100" cy="845" r="2" fill="#d4af77" />
+          <circle cx="1250" cy="825" r="2.5" fill="#d4af77" />
+        </g>
       </svg>
 
-      {/* جسيمات ضوء (bokeh) متحركة */}
+      {/* جسيمات ضوء (bokeh) متحركة - أضواء دافئة */}
       <div className="forest-bg__bokeh">
-        {Array.from({ length: 14 }).map((_, i) => (
+        {Array.from({ length: 16 }).map((_, i) => (
           <span
             key={i}
             style={{
-              left: `${(i * 7.3 + 5) % 100}%`,
-              top: `${(i * 13.7 + 10) % 90}%`,
-              width: `${6 + (i % 4) * 5}px`,
-              height: `${6 + (i % 4) * 5}px`,
-              animationDelay: `${(i % 6) * 0.8}s`,
-              animationDuration: `${5 + (i % 5)}s`
+              left: `${(i * 6.25 + 3) % 100}%`,
+              top: `${(i * 5.6 + 8) % 85}%`,
+              width: `${5 + (i % 5) * 4}px`,
+              height: `${5 + (i % 5) * 4}px`,
+              animationDelay: `${(i % 8) * 0.6}s`,
+              animationDuration: `${6 + (i % 6)}s`,
+              background: i % 3 === 0 ? 'radial-gradient(circle, rgba(245,230,168,0.95) 0%, rgba(245,230,168,0) 70%)' : 'radial-gradient(circle, rgba(216,243,196,0.85) 0%, rgba(216,243,196,0) 70%)'
             }}
           />
         ))}
       </div>
 
-      {/* طبقة تعتيم للوضوح */}
+      {/* طبقة تعتيم لتحسين التباين والوضوح */}
       <div className="forest-bg__overlay" />
     </div>
   );
 }
 
-// مولّد صف أشجار صنوبرية مثلثة بأحجام متدرجة
-function treeRow(offsetX, baseY, count, height, scale) {
+// مولّد صف أشجار صنوبرية واقعية بأحجام متدرجة
+function treeRowRealistic(offsetX, baseY, count, height, scale) {
   const trees = [];
   const gap = 1560 / count;
   for (let i = 0; i < count; i++) {
-    const x = offsetX + i * gap + (i % 2) * 40;
-    const h = height * (0.85 + (i % 3) * 0.12);
-    const w = h * 0.55 * scale;
-    trees.push(<Pine key={`${offsetX}-${i}`} x={x} baseY={baseY} w={w} h={h} />);
+    const x = offsetX + i * gap + (i % 2) * 60 - 30;
+    const h = height * (0.8 + (i % 4) * 0.15);
+    const w = h * 0.5 * scale;
+    const variation = (i % 3) - 1;
+    trees.push(
+      <PineRealistic
+        key={`${offsetX}-${i}`}
+        x={x + variation * 20}
+        baseY={baseY}
+        w={w}
+        h={h}
+      />
+    );
   }
   return trees;
 }
 
-// شجرة صنوبر من 3 طبقات مثلثة + جذع
-function Pine({ x, baseY, w, h }) {
+// شجرة صنوبر واقعية: 4 طبقات مثلثية + جذع سميك
+function PineRealistic({ x, baseY, w, h }) {
   const cx = x;
-  const layer = h / 3.2;
-  const trunkW = w * 0.12;
+  const layer = h / 4;
+  const trunkW = w * 0.15;
+  const trunkH = layer * 0.8;
+
   return (
     <g>
-      <rect x={cx - trunkW / 2} y={baseY - layer * 0.4} width={trunkW} height={layer * 0.5} />
-      <polygon points={`${cx},${baseY - h} ${cx - w / 2},${baseY - h + layer * 1.5} ${cx + w / 2},${baseY - h + layer * 1.5}`} />
-      <polygon points={`${cx},${baseY - h + layer * 0.9} ${cx - w * 0.58},${baseY - h + layer * 2.4} ${cx + w * 0.58},${baseY - h + layer * 2.4}`} />
-      <polygon points={`${cx},${baseY - h + layer * 1.9} ${cx - w * 0.65},${baseY - layer * 0.2} ${cx + w * 0.65},${baseY - layer * 0.2}`} />
+      {/* الطبقة العليا (الأضيق) */}
+      <polygon points={`${cx},${baseY - h} ${cx - w * 0.35},${baseY - h + layer * 1.2} ${cx + w * 0.35},${baseY - h + layer * 1.2}`} />
+      {/* الطبقة الثانية */}
+      <polygon points={`${cx},${baseY - h + layer * 0.7} ${cx - w * 0.55},${baseY - h + layer * 2.3} ${cx + w * 0.55},${baseY - h + layer * 2.3}`} />
+      {/* الطبقة الثالثة */}
+      <polygon points={`${cx},${baseY - h + layer * 1.8} ${cx - w * 0.68},${baseY - h + layer * 3.5} ${cx + w * 0.68},${baseY - h + layer * 3.5}`} />
+      {/* الطبقة السفلى (الأعرض) */}
+      <polygon points={`${cx},${baseY - h + layer * 2.8} ${cx - w * 0.75},${baseY - layer * 0.1} ${cx + w * 0.75},${baseY - layer * 0.1}`} />
+      {/* الجذع */}
+      <rect x={cx - trunkW / 2} y={baseY - trunkH} width={trunkW} height={trunkH} fill="#3d2817" />
     </g>
   );
 }

@@ -14,7 +14,20 @@ export default function Navbar() {
   return (
     <header className="navbar">
       <Link href="/" className="navbar__brand">
-        🛍️ {t('appName')}
+        <svg width="32" height="32" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '0.5rem', display: 'inline-block', verticalAlign: 'middle' }}>
+          <defs>
+            <linearGradient id="treeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style={{ stopColor: '#14b8a6', stopOpacity: '1' }} />
+              <stop offset="100%" style={{ stopColor: '#0d9488', stopOpacity: '1' }} />
+            </linearGradient>
+          </defs>
+          <circle cx="128" cy="60" r="50" fill="url(#treeGradient)"/>
+          <circle cx="70" cy="110" r="42" fill="url(#treeGradient)" opacity="0.9"/>
+          <circle cx="186" cy="110" r="42" fill="url(#treeGradient)" opacity="0.9"/>
+          <rect x="116" y="155" width="24" height="60" rx="6" fill="#3d2817"/>
+          <ellipse cx="128" cy="222" rx="20" ry="8" fill="#3d2817" opacity="0.6"/>
+        </svg>
+        {t('appName')}
       </Link>
       <nav className="navbar__links">
         <Link href="/">{t('nav.home')}</Link>
