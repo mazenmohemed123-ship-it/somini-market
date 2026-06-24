@@ -338,68 +338,66 @@ a { color: inherit; text-decoration: none; }
 
 .auth-card {
   width: 100%; max-width: 440px;
-  /* RESTYLED: glassmorphism */
-  background: rgba(255, 255, 255, 0.13);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
-  backdrop-filter: blur(20px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  /* RESTYLED: solid white card on dark forest background */
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
   padding: 2rem;
   animation: fadeUp 0.5s ease;
 }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-/* RESTYLED: نصوص الهوية فوق البطاقة → أبيض */
+/* RESTYLED: نصوص الهوية فوق البطاقة → أبيض (على خلفية الغابة) */
 .auth-brand { text-align: center; margin-bottom: 1.5rem; }
 .auth-brand h1 { font-size: 1.8rem; font-weight: 800; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.45); margin: 0 0 0.3rem; }
 .auth-brand p { color: rgba(255,255,255,0.8); font-size: 0.9rem; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
 .auth-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; font-style: italic; }
 
-/* RESTYLED: مبدّل التبويبات على خلفية داكنة */
-.auth-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.2); margin-bottom: 1.5rem; }
+/* RESTYLED: مبدّل التبويبات (داخل الكارد الأبيض) */
+.auth-tabs { display: flex; border-bottom: 1px solid #e5e7eb; margin-bottom: 1.5rem; }
 .auth-tabs button {
   flex: 1; padding: 0.85rem; background: none; border: none; cursor: pointer;
   font: inherit; font-weight: 600; font-size: 1rem;
-  color: rgba(255,255,255,0.6);
+  color: #6b7280;
   border-bottom: 2px solid transparent; transition: all 0.2s;
 }
 .auth-tabs button.active { color: #0058bc; font-weight: 700; border-bottom-color: #0058bc; }
 
 .auth-field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
-/* RESTYLED: تسميات فاتحة لتُقرأ على الزجاج */
-.auth-field label { font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.85); }
+/* RESTYLED: تسميات داكنة داخل الكارد الأبيض */
+.auth-field label { font-size: 0.78rem; font-weight: 600; color: #6b7280; }
 .auth-field input {
   padding: 0.8rem 1rem;
-  border-radius: 8px;                              /* RESTYLED */
-  border: 1px solid rgba(255,255,255,0.4);         /* RESTYLED */
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
   font: inherit;
-  background: rgba(255,255,255,0.85);              /* RESTYLED */
-  color: #1a1a2e;                                  /* RESTYLED */
+  background: #f9fafb;
+  color: #1a1a2e;
   transition: all 0.2s;
 }
-.auth-field input::placeholder { color: #6b7280; }
-.auth-field input:focus { outline: none; border-color: #0058bc; box-shadow: 0 0 0 3px rgba(0,88,188,0.25); } /* RESTYLED */
+.auth-field input::placeholder { color: #9ca3af; }
+.auth-field input:focus { outline: none; border-color: #0058bc; box-shadow: 0 0 0 3px rgba(0,88,188,0.15); }
 
 .auth-btn {
-  width: 100%; height: 52px;                       /* RESTYLED */
-  border-radius: 8px; border: none; cursor: pointer; /* RESTYLED */
+  width: 100%; height: 52px;
+  border-radius: 8px; border: 1px solid #d1d5db; cursor: pointer;
   font: inherit; font-weight: 700; font-size: 1rem; margin-top: 0.5rem;
-  background: #ffffff; color: #0058bc;             /* RESTYLED */
+  background: #ffffff; color: #0058bc;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.auth-btn:hover:not(:disabled) { transform: scale(1.01); box-shadow: 0 8px 22px rgba(0,0,0,0.3); } /* RESTYLED */
+.auth-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,88,188,0.15); }
 .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* RESTYLED: شروط/أخطاء بنصوص فاتحة داخل الزجاج */
-.auth-card .terms-check { color: rgba(255,255,255,0.85); }
-.auth-card .terms-check a { color: #cfe2ff; }
-.auth-card .error { color: #ffb4b4; }
+/* RESTYLED: شروط/أخطاء (داخل الكارد الأبيض) */
+.auth-card .terms-check { color: #4b5563; }
+.auth-card .terms-check a { color: #0058bc; }
+.auth-card .error { color: #dc2626; }
 
-/* RESTYLED: روابط أسفل البطاقة */
+/* RESTYLED: روابط أسفل البطاقة (على خلفية الغابة) */
 .auth-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
-.auth-footer a { font-size: 0.78rem; color: rgba(255,255,255,0.7); }
-.auth-copy { text-align: center; margin-top: 1rem; font-size: 0.72rem; color: rgba(255,255,255,0.6); }
+.auth-footer a { font-size: 0.78rem; color: rgba(255,255,255,0.8); }
+.auth-copy { text-align: center; margin-top: 1rem; font-size: 0.72rem; color: rgba(255,255,255,0.65); }
 
 .auth-toggle-theme { position: absolute; top: 1.25rem; inset-inline-end: 1.25rem; z-index: 2; }
 
