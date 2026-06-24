@@ -9,6 +9,27 @@ const { REGION } = require('../lib/config');
 const { db, FieldValue } = require('../lib/admin');
 const { sendToUser } = require('./notifications');
 
+// =============================================================
+// حدود الثقة التصاعدية (المستند §3.2): شركة/بائع جديد لا يبدأ بصفقة ضخمة.
+// السقف يرتفع كلما أكمل البائع صفقات بنجاح. القيم بالجنيه المصري (EGP)،
+// قابلة للتعديل لاحقاً بالاتفاق مع المؤسس.
+// =============================================================
+const TRUST_TIERS = [
+  { minCompleted: 0, cap: 50000 },     // بائع جديد: حتى 50 ألف
+  { minCompleted: 1, cap: 500000 },    // بعد صفقة ناجحة: حتى 500 ألف
+  { minCompleted: 3, cap: 5000000 },   // بعد 3 صفقات: حتى 5 مليون
+  { minCompleted: 6, cap: Infinity }   // بائع موثوق: بلا سقف
+];
+
+function getDealValueCap(completedDealsCount) {
+  const n = completedDealsCount || 0;
+  let cap = TRUST_TIERS[0].cap;
+  for (const tier of TRUST_TIERS) {
+    if (n >= tier.minCompleted) cap = tier.cap;
+  }
+  return cap;
+}
+
 /**
  * initiateDeal — المشتري يفتح صفقة مع بائع
  * الشروط: كلا الطرفين KYC-approved
@@ -188,6 +209,17 @@ const respondToNegotiation = onCall({ region: REGION }, async (request) => {
     const totalAmount = negotiation.quantity * negotiation.price;
     const platformFee = Math.ceil(totalAmount * 0.05); // 5% عمولة
     const total = totalAmount + platformFee;
+
+    // حدّ الثقة التصاعدي: لا يُسمح للبائع الجديد بصفقة تتجاوز سقفه
+    const sellerSnap = await db.collection('users').doc(deal.sellerId).get();
+    const sellerCompleted = sellerSnap.exists ? (sellerSnap.data().completedDealsCount || 0) : 0;
+    const cap = getDealValueCap(sellerCompleted);
+    if (total > cap) {
+      throw new HttpsError(
+        'failed-precondition',
+        `قيمة الصفقة (${total} ج.م) تتجاوز الحد المسموح للبائع حالياً (${cap} ج.م). يرتفع الحد بعد إتمام صفقات ناجحة.`
+      );
+    }
 
     await db.collection('deals').doc(dealId).update({
       status: 'terms_agreed',
@@ -621,6 +653,36 @@ const releaseMilestonePayment = onCall({ region: REGION }, async (request) => {
     { title: '💰 تم تحرير دفعة', body: `${sellerPayout} EGP من "${milestone.title}"` },
     { type: 'deal', dealId: deal.dealId, url: '/seller/deals' }
   );
+
+  // إذا تحرّرت كل المراحل → الصفقة مكتملة، ويُزاد عدّاد ثقة البائع (يرفع سقفه)
+  const allMs = await db.collection('dealMilestones').where('dealId', '==', milestone.dealId).get();
+  const allReleased = !allMs.empty && allMs.docs.every(d => d.data().status === 'released');
+  if (allReleased && deal.status !== 'completed') {
+    await db.collection('deals').doc(milestone.dealId).update({
+      status: 'completed',
+      completedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp()
+    });
+    await db.collection('users').doc(deal.sellerId).set(
+      { completedDealsCount: FieldValue.increment(1), updatedAt: FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+    const auditRef = db.collection('audit_log').doc();
+    await auditRef.set({
+      timestamp: FieldValue.serverTimestamp(),
+      action: 'deal_completed',
+      actor: uid,
+      target: 'deal',
+      targetId: milestone.dealId,
+      details: { sellerId: deal.sellerId, total: deal.total },
+      evidence: null
+    });
+    await sendToUser(
+      deal.sellerId,
+      { title: '🎉 صفقة مكتملة', body: 'تم إنجاز كل المراحل — ارتفع حد الثقة الخاص بك.' },
+      { type: 'deal', dealId: deal.dealId, url: '/seller/deals' }
+    );
+  }
 
   return { ok: true, status: 'released', message: 'تم تحرير الدفعة' };
 });

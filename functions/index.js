@@ -81,6 +81,12 @@ exports.submitDealForApproval = deals.submitDealForApproval;
 exports.approveDeal = deals.approveDeal;
 exports.releaseMilestonePayment = deals.releaseMilestonePayment;
 
+// --- التقسيط الداخلي (Pay Later) ---
+const installments = require('./src/installments');
+exports.createInstallmentPlan = installments.createInstallmentPlan;
+exports.markInstallmentPaid = installments.markInstallmentPaid;
+exports.checkOverdueInstallments = installments.checkOverdueInstallments;
+
 // --- لوحة الأدمن (superAdmin) ---
 const adminPanel = require('./src/admin');
 exports.adminStats = adminPanel.adminStats;

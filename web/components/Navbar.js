@@ -37,6 +37,7 @@ export default function Navbar() {
         {isSeller && <Link href="/seller/dashboard">{t('nav.dashboard')}</Link>}
         {isSeller && <Link href="/seller/deals">💼 الصفقات</Link>}
         {user && role === 'buyer' && <Link href="/buyer/deals">💼 صفقاتي</Link>}
+        {user && <Link href="/installments">🗓️ التقسيط</Link>}
         {!isSeller && !isAdmin && <Link href="/seller/start">{t('nav.sell')}</Link>}
         {isAdmin && <Link href="/admin" className="navbar__admin">🛡️ الأدمن</Link>}
         {isAdmin && <Link href="/admin/deals" className="navbar__admin">📊 الصفقات</Link>}

@@ -259,6 +259,17 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
     }
 
+    // ---------- installment_plans (خطط التقسيط) ----------
+    match /installment_plans/{planId} {
+      allow read: if isSignedIn() && (
+        resource.data.buyerId == request.auth.uid ||
+        resource.data.sellerId == request.auth.uid ||
+        isSuperAdmin()
+      );
+      allow create, update: if false; // Cloud Functions فقط
+      allow delete: if isSuperAdmin();
+    }
+
     // ---------- KYC submissions (التحقق من الهوية) ----------
     match /kyc_submissions/{submissionId} {
       allow read: if isSignedIn() && (

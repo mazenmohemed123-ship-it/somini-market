@@ -8,6 +8,7 @@ import { functions, db } from '../../../lib/firebase';
 import { useAuth } from '../../../lib/auth';
 import { useI18n } from '../../../lib/i18n';
 import Navbar from '../../../components/Navbar';
+import Chat from '../../../components/Chat';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 
 export default function BuyerDealsPage() {
@@ -118,6 +119,25 @@ export default function BuyerDealsPage() {
     }
   };
 
+  // إنشاء خطة تقسيط لصفقة موافق عليها
+  const handleCreateInstallments = async () => {
+    const count = parseInt(prompt('على كم دفعة شهرية تريد التقسيط؟ (2 إلى 24)', '3'), 10);
+    if (!count || count < 2 || count > 24) {
+      setMsg('❌ عدد الدفعات يجب أن يكون بين 2 و 24');
+      return;
+    }
+    try {
+      const res = await httpsCallable(functions, 'createInstallmentPlan')({
+        parentType: 'deal',
+        parentId: selectedDeal.id,
+        count
+      });
+      setMsg(`✅ تم إنشاء خطة تقسيط على ${res.data.count} دفعات`);
+    } catch (err) {
+      setMsg('❌ ' + (err.message || 'خطأ في إنشاء التقسيط'));
+    }
+  };
+
   if (!user || role !== 'buyer') {
     return (
       <>
@@ -215,7 +235,18 @@ export default function BuyerDealsPage() {
                   <div>
                     <span style={{ fontWeight: '600' }}>الإجمالي:</span> {selectedDeal.total || 'قيد المفاوضة'} EGP
                   </div>
+                  {selectedDeal.incoterm && (
+                    <div>
+                      <span style={{ fontWeight: '600' }}>شرط التسليم:</span> {selectedDeal.incoterm}
+                    </div>
+                  )}
                 </div>
+
+                {['approved', 'in_progress'].includes(selectedDeal.status) && (
+                  <button className="btn btn--small" onClick={handleCreateInstallments} style={{ marginTop: '1rem' }}>
+                    🗓️ ادفع بالتقسيط
+                  </button>
+                )}
               </div>
 
               {/* المفاوضات */}
@@ -345,6 +376,16 @@ export default function BuyerDealsPage() {
                   </div>
                 </div>
               )}
+
+              {/* غرفة محادثة الصفقة (deal_room) */}
+              <div className="panel" style={{ marginTop: '1.5rem' }}>
+                <h3 className="panel__title">💬 محادثة الصفقة</h3>
+                <Chat
+                  peerId={selectedDeal.sellerId}
+                  peerName="البائع"
+                  context={{ type: 'deal', id: selectedDeal.id }}
+                />
+              </div>
 
               {msg && <p className="toast-msg" style={{ marginTop: '1.5rem' }}>{msg}</p>}
             </div>

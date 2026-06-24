@@ -11,7 +11,16 @@ import { functions, db } from '../../../lib/firebase';
 import { useI18n } from '../../../lib/i18n';
 import { useAuth } from '../../../lib/auth';
 import Navbar from '../../../components/Navbar';
-import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, orderBy, doc, getDoc } from 'firebase/firestore';
+
+// حدود الثقة التصاعدية (مطابقة لمنطق الـ backend)
+function trustInfo(completed) {
+  const n = completed || 0;
+  if (n >= 6) return { cap: 'بلا سقف', label: 'بائع موثوق ⭐' };
+  if (n >= 3) return { cap: '5,000,000 ج.م', label: 'متقدّم' };
+  if (n >= 1) return { cap: '500,000 ج.م', label: 'متوسط' };
+  return { cap: '50,000 ج.م', label: 'جديد' };
+}
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -21,6 +30,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentDeals, setRecentDeals] = useState([]);
+  const [completedDeals, setCompletedDeals] = useState(0);
   const [err, setErr] = useState(null);
 
   useEffect(() => {
@@ -51,6 +61,10 @@ export default function DashboardPage() {
         );
         const dealsSnap = await getDocs(dealsQ);
         setRecentDeals(dealsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+        // عدّاد الثقة (الصفقات المكتملة) لعرض السقف الحالي
+        const meSnap = await getDoc(doc(db, 'users', user.uid));
+        if (meSnap.exists()) setCompletedDeals(meSnap.data().completedDealsCount || 0);
       } catch (e) {
         setErr(e.message);
       }
@@ -175,6 +189,20 @@ export default function DashboardPage() {
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>إجمالي الطلبات</div>
                   <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--teal)' }}>
                     {stats.monthCount}
+                  </div>
+                </div>
+
+                <div style={{
+                  padding: '0.75rem',
+                  background: 'var(--bg-secondary)',
+                  borderRadius: '8px',
+                  borderLeft: '4px solid var(--warn)'
+                }}>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>
+                    مستوى الثقة ({trustInfo(completedDeals).label}) · {completedDeals} صفقة مكتملة
+                  </div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: '700', color: 'var(--warn)' }}>
+                    حد الصفقة: {trustInfo(completedDeals).cap}
                   </div>
                 </div>
               </div>

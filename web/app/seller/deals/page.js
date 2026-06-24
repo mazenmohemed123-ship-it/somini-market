@@ -8,6 +8,7 @@ import { functions, db, storage } from '../../../lib/firebase';
 import { useAuth } from '../../../lib/auth';
 import { useI18n } from '../../../lib/i18n';
 import Navbar from '../../../components/Navbar';
+import Chat from '../../../components/Chat';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -326,6 +327,16 @@ export default function SellerDealsPage() {
                   </div>
                 </div>
               )}
+
+              {/* غرفة محادثة الصفقة (deal_room) */}
+              <div className="panel" style={{ marginTop: '1.5rem' }}>
+                <h3 className="panel__title">💬 محادثة الصفقة</h3>
+                <Chat
+                  peerId={selectedDeal.buyerId}
+                  peerName="المشتري"
+                  context={{ type: 'deal', id: selectedDeal.id }}
+                />
+              </div>
 
               {msg && <p className="toast-msg" style={{ marginTop: '1.5rem' }}>{msg}</p>}
             </div>
