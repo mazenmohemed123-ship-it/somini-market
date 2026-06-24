@@ -35,8 +35,11 @@ export default function Navbar() {
         {user && <Link href="/chats">💬</Link>}
         {user && !isSeller && <Link href="/kyc" style={{ color: 'var(--teal)', fontWeight: '600' }}>🔐 KYC</Link>}
         {isSeller && <Link href="/seller/dashboard">{t('nav.dashboard')}</Link>}
+        {isSeller && <Link href="/seller/deals">💼 الصفقات</Link>}
+        {user && role === 'buyer' && <Link href="/buyer/deals">💼 صفقاتي</Link>}
         {!isSeller && !isAdmin && <Link href="/seller/start">{t('nav.sell')}</Link>}
         {isAdmin && <Link href="/admin" className="navbar__admin">🛡️ الأدمن</Link>}
+        {isAdmin && <Link href="/admin/deals" className="navbar__admin">📊 الصفقات</Link>}
         <ThemeToggle />
         <select
           className="navbar__lang"

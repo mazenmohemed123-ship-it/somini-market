@@ -70,6 +70,17 @@ const notifications = require('./src/notifications');
 exports.saveFcmToken = notifications.saveFcmToken;
 exports.removeFcmToken = notifications.removeFcmToken;
 
+// --- المرحلة 3: صفقات الشركات ---
+const deals = require('./src/deals');
+exports.initiateDeal = deals.initiateDeal;
+exports.respondToNegotiation = deals.respondToNegotiation;
+exports.createMilestones = deals.createMilestones;
+exports.startMilestone = deals.startMilestone;
+exports.completeMilestone = deals.completeMilestone;
+exports.submitDealForApproval = deals.submitDealForApproval;
+exports.approveDeal = deals.approveDeal;
+exports.releaseMilestonePayment = deals.releaseMilestonePayment;
+
 // --- لوحة الأدمن (superAdmin) ---
 const adminPanel = require('./src/admin');
 exports.adminStats = adminPanel.adminStats;

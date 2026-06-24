@@ -214,6 +214,51 @@ service cloud.firestore {
       allow update, delete: if isOwner(resource.data.userId) || isSuperAdmin();
     }
 
+    // ---------- deals (المرحلة 3: صفقات الشركات) ----------
+    match /deals/{dealId} {
+      allow read: if isSignedIn() && (
+        resource.data.buyerId == request.auth.uid
+        || resource.data.sellerId == request.auth.uid
+        || isSuperAdmin()
+      );
+      allow create: if false; // Cloud Function فقط (initiateDeal)
+      allow update: if false; // Cloud Function فقط
+      allow delete: if isSuperAdmin();
+    }
+
+    // ---------- dealNegotiations ----------
+    match /dealNegotiations/{negotiationId} {
+      allow read: if isSignedIn() && (
+        get(/databases/$(database)/documents/deals/$(resource.data.dealId)).data.buyerId == request.auth.uid
+        || get(/databases/$(database)/documents/deals/$(resource.data.dealId)).data.sellerId == request.auth.uid
+        || isSuperAdmin()
+      );
+      allow create: if false; // Cloud Function فقط
+      allow update, delete: if false; // append-only
+    }
+
+    // ---------- dealMilestones ----------
+    match /dealMilestones/{milestoneId} {
+      allow read: if isSignedIn() && (
+        get(/databases/$(database)/documents/deals/$(resource.data.dealId)).data.buyerId == request.auth.uid
+        || get(/databases/$(database)/documents/deals/$(resource.data.dealId)).data.sellerId == request.auth.uid
+        || isSuperAdmin()
+      );
+      allow create: if false; // Cloud Function فقط
+      allow update: if false; // Cloud Function فقط
+      allow delete: if isSuperAdmin();
+    }
+
+    // ---------- payouts (عمليات الدفع للبائعين) ----------
+    match /payouts/{payoutId} {
+      allow read: if isSignedIn() && (
+        resource.data.sellerId == request.auth.uid || isSuperAdmin()
+      );
+      allow create: if false; // Cloud Function فقط
+      allow update: if false; // Cloud Function فقط
+      allow delete: if isSuperAdmin();
+    }
+
     // ---------- KYC submissions (التحقق من الهوية) ----------
     match /kyc_submissions/{submissionId} {
       allow read: if isSignedIn() && (
