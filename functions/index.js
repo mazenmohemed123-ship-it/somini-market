@@ -51,6 +51,12 @@ exports.assistantBot = bot.assistantBot;
 const orders = require('./src/orders');
 exports.updateOrderStatus = orders.updateOrderStatus;
 
+// --- إنشاء الطلب (مسار البيع المباشر) ---
+const createOrder = require('./src/createOrder');
+exports.createOrder = createOrder.createOrder;
+exports.confirmOrderShipped = createOrder.confirmOrderShipped;
+exports.confirmOrderDelivered = createOrder.confirmOrderDelivered;
+
 // --- تقييمات المنتجات ---
 const reviews = require('./src/reviews');
 exports.addReview = reviews.addReview;
