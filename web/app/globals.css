@@ -313,88 +313,105 @@ a { color: inherit; text-decoration: none; }
 [data-theme="forest"] .filters input::placeholder,
 [data-theme="forest"] .auth__form input::placeholder { color: rgba(240,253,244,0.6); }
 
-/* ===== بطاقة تسجيل الدخول (glass card) ===== */
+/* ===== بطاقة تسجيل الدخول (forest glass — مطابقة للموكب) ===== */
 .auth-screen {
   min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
   padding: 1.5rem; position: relative;
+  /* RESTYLED: خلفية غابة داكنة مع تدرّج احتياطي إن لم تتوفر الصورة */
+  background:
+    url('/bg-auth.jpg') center / cover no-repeat,
+    linear-gradient(135deg, #0d1a0d 0%, #1a2a1a 60%, #0a150a 100%);
+  background-size: cover;          /* RESTYLED */
+  background-position: center;     /* RESTYLED */
 }
+/* RESTYLED: طبقة bokeh كهرماني دافئ (3 تدرّجات شعاعية) */
+.auth-screen::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(240px circle at 86% 12%, rgba(255,186,99,0.15), transparent 70%),
+    radial-gradient(280px circle at 10% 88%, rgba(255,170,80,0.13), transparent 70%),
+    radial-gradient(320px circle at 50% 50%, rgba(255,200,120,0.10), transparent 70%);
+}
+.auth-screen > * { position: relative; z-index: 1; }
+
 .auth-card {
   width: 100%; max-width: 440px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  box-shadow: var(--shadow);
+  /* RESTYLED: glassmorphism */
+  background: rgba(255, 255, 255, 0.13);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
   padding: 2rem;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   animation: fadeUp 0.5s ease;
-}
-[data-theme="forest"] .auth-card {
-  background: rgba(255,255,255,0.78);
-  color: #0b1c30;
 }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
+/* RESTYLED: نصوص الهوية فوق البطاقة → أبيض */
 .auth-brand { text-align: center; margin-bottom: 1.5rem; }
-.auth-brand h1 { font-size: 1.8rem; font-weight: 800; color: var(--teal-dark); margin: 0 0 0.3rem; }
-[data-theme="forest"] .auth-screen .auth-brand h1 { color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
-.auth-brand p { color: var(--muted); font-size: 0.9rem; }
-[data-theme="forest"] .auth-screen .auth-brand p { color: rgba(255,255,255,0.9); text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
-.auth-brand small { color: var(--muted); font-size: 0.75rem; opacity: 0.8; }
-[data-theme="forest"] .auth-screen .auth-brand small { color: rgba(255,255,255,0.7); }
+.auth-brand h1 { font-size: 1.8rem; font-weight: 800; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.45); margin: 0 0 0.3rem; }
+.auth-brand p { color: rgba(255,255,255,0.8); font-size: 0.9rem; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+.auth-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; font-style: italic; }
 
-.auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+/* RESTYLED: مبدّل التبويبات على خلفية داكنة */
+.auth-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.2); margin-bottom: 1.5rem; }
 .auth-tabs button {
   flex: 1; padding: 0.85rem; background: none; border: none; cursor: pointer;
-  font: inherit; font-weight: 600; font-size: 1rem; color: var(--muted);
+  font: inherit; font-weight: 600; font-size: 1rem;
+  color: rgba(255,255,255,0.6);
   border-bottom: 2px solid transparent; transition: all 0.2s;
 }
-[data-theme="forest"] .auth-card .auth-tabs button { color: #525f71; }
-.auth-tabs button.active { color: var(--teal-dark); border-bottom-color: var(--teal-dark); }
-[data-theme="forest"] .auth-card .auth-tabs button.active { color: #0058bc; border-bottom-color: #0058bc; }
+.auth-tabs button.active { color: #0058bc; font-weight: 700; border-bottom-color: #0058bc; }
 
 .auth-field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
-.auth-field label { font-size: 0.78rem; font-weight: 600; color: var(--muted); }
-[data-theme="forest"] .auth-card .auth-field label { color: #414755; }
+/* RESTYLED: تسميات فاتحة لتُقرأ على الزجاج */
+.auth-field label { font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.85); }
 .auth-field input {
-  padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid var(--border);
-  font: inherit; background: var(--card); color: var(--text); transition: all 0.2s;
-}
-[data-theme="forest"] .auth-card .auth-field input {
-  background: #eff4ff; color: #0b1c30; border-color: transparent;
-}
-.auth-field input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
-
-.auth-btn {
-  width: 100%; padding: 0.9rem; border-radius: 12px; border: none; cursor: pointer;
-  font: inherit; font-weight: 700; font-size: 1rem; margin-top: 0.5rem;
-  background: var(--teal); color: #fff; transition: all 0.2s;
-}
-.auth-btn:hover:not(:disabled) { background: var(--teal-dark); transform: translateY(-1px); }
-.auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-[data-theme="forest"] .auth-card .auth-btn { background: rgba(255,255,255,0.6); color: #0058bc; border: 1px solid rgba(0,88,188,0.3); }
-[data-theme="forest"] .auth-card .auth-btn:hover:not(:disabled) { background: rgba(255,255,255,0.85); }
-
-.auth-divider { display: flex; align-items: center; gap: 0.75rem; margin: 1.5rem 0; color: var(--muted); font-size: 0.85rem; }
-.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-.auth-google {
-  width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.6rem;
-  padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border);
-  background: var(--card); color: var(--text); cursor: pointer; font: inherit; font-weight: 600;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;                              /* RESTYLED */
+  border: 1px solid rgba(255,255,255,0.4);         /* RESTYLED */
+  font: inherit;
+  background: rgba(255,255,255,0.85);              /* RESTYLED */
+  color: #1a1a2e;                                  /* RESTYLED */
   transition: all 0.2s;
 }
-[data-theme="forest"] .auth-card .auth-google { background: rgba(255,255,255,0.5); color: #0b1c30; }
-.auth-google:hover { background: var(--teal-soft); }
+.auth-field input::placeholder { color: #6b7280; }
+.auth-field input:focus { outline: none; border-color: #0058bc; box-shadow: 0 0 0 3px rgba(0,88,188,0.25); } /* RESTYLED */
 
+.auth-btn {
+  width: 100%; height: 52px;                       /* RESTYLED */
+  border-radius: 8px; border: none; cursor: pointer; /* RESTYLED */
+  font: inherit; font-weight: 700; font-size: 1rem; margin-top: 0.5rem;
+  background: #ffffff; color: #0058bc;             /* RESTYLED */
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.auth-btn:hover:not(:disabled) { transform: scale(1.01); box-shadow: 0 8px 22px rgba(0,0,0,0.3); } /* RESTYLED */
+.auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* RESTYLED: شروط/أخطاء بنصوص فاتحة داخل الزجاج */
+.auth-card .terms-check { color: rgba(255,255,255,0.85); }
+.auth-card .terms-check a { color: #cfe2ff; }
+.auth-card .error { color: #ffb4b4; }
+
+/* RESTYLED: روابط أسفل البطاقة */
 .auth-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
-.auth-footer a { font-size: 0.78rem; color: var(--muted); }
-[data-theme="forest"] .auth-screen .auth-footer a { color: rgba(255,255,255,0.85); text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
-.auth-copy { text-align: center; margin-top: 1rem; font-size: 0.72rem; color: var(--muted); }
-[data-theme="forest"] .auth-screen .auth-copy { color: rgba(255,255,255,0.6); }
+.auth-footer a { font-size: 0.78rem; color: rgba(255,255,255,0.7); }
+.auth-copy { text-align: center; margin-top: 1rem; font-size: 0.72rem; color: rgba(255,255,255,0.6); }
 
-.auth-toggle-theme { position: absolute; top: 1.25rem; inset-inline-end: 1.25rem; }
+.auth-toggle-theme { position: absolute; top: 1.25rem; inset-inline-end: 1.25rem; z-index: 2; }
+
+/* RESTYLED: ملاءمة الموبايل */
+@media (max-width: 480px) {
+  .auth-screen { padding: 1rem; }
+  .auth-card { padding: 1.4rem; border-radius: 14px; }
+  .auth-brand h1 { font-size: 1.5rem; }
+  .auth-tabs button { padding: 0.7rem; font-size: 0.95rem; }
+  .auth-toggle-theme { top: 0.75rem; inset-inline-end: 0.75rem; }
+  .auth-footer { gap: 0.75rem; }
+}
 
 /* ===== عناصر النماذج موحّدة عبر كل المنصة ===== */
 input, textarea, select {
