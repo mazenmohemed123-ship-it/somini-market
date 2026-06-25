@@ -17,8 +17,8 @@ jobs:
         with:
           node-version: '20'
 
-      # تثبيت وبناء المشروع — ينتج مجلد web/out (تصدير ثابت)
-      - name: Install dependencies
+      # تثبيت وبناء الواجهة — ينتج مجلد web/out (تصدير ثابت)
+      - name: Install web dependencies
         working-directory: ./web
         run: npm ci
 
@@ -26,31 +26,7 @@ jobs:
         working-directory: ./web
         run: npm run build
 
-      # تثبيت firebase-tools والـ dependencies
-      - name: Install Firebase CLI and dependencies
-        run: |
-          npm install -g firebase-tools
-          cd functions && npm ci && cd ..
-
-      # إنشاء ملف serviceAccount مؤقت من Secret
-      - name: Create Firebase service account file
-        run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOMINI_MARKET }}' > /tmp/serviceAccount.json
-
-      # نشر الدوال وقواعس الأمان والتخزين والـ Database
-      - name: Deploy Cloud Functions, Rules, Storage, and Database
-        run: |
-          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/serviceAccount.json
-          firebase deploy --only functions,firestore:rules,storage,database --project somini-market
-
-      # نشر البيانات التجريبية (حسابات + منتجات)
-      - name: Seed demo data (accounts + products)
-        run: |
-          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/serviceAccount.json
-          export GCLOUD_PROJECT=somini-market
-          node functions/scripts/seed-demo.js
-
-      # نشر الواجهة (Hosting)
+      # نشر الواجهة على Firebase Hosting
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
